@@ -1,15 +1,7 @@
 
 <div align="center">
 
-# 🖨️ PrintWorth
-
-### Calculadora de custos e precificação para impressão 3D
-
-**Conheça seus custos. Valorize suas impressões.**
-
-Aplicativo Android para calcular custos de produção, estimar lucros e definir preços de venda de peças impressas em 3D.
-
-<br>
+![Banner oficial PrintWorth](assets/branding/printworth-banner.png)
 
 ![Android](https://img.shields.io/badge/ANDROID-PLATAFORMA-12343B?style=for-the-badge&logo=android&logoColor=white)
 ![Kotlin](https://img.shields.io/badge/KOTLIN-MULTIPLATFORM-007F73?style=for-the-badge&logo=kotlin&logoColor=white)
@@ -17,6 +9,8 @@ Aplicativo Android para calcular custos de produção, estimar lucros e definir 
 ![Material 3](https://img.shields.io/badge/MATERIAL-3-007F73?style=for-the-badge)
 
 ![Status](https://img.shields.io/badge/STATUS-EM_DESENVOLVIMENTO-007F73?style=for-the-badge)
+
+**Conheça seus custos. Valorize suas impressões.**
 
 </div>
 
@@ -112,6 +106,8 @@ Preço de venda = Custo base / (1 - Margem - Comissão)
 
 A margem e a comissão devem ser convertidas de porcentagens para frações decimais.
 
+A soma da margem com a comissão deve ser inferior a 100%.
+
 ### 6. Lucro estimado
 
 ```text
@@ -158,6 +154,8 @@ Considere uma peça impressa com os seguintes dados:
 
 Os resultados são estimativas baseadas nos custos informados.
 
+Tributos, mão de obra, frete e possíveis falhas de impressão não estão incluídos automaticamente nesta versão.
+
 ---
 
 ## 🎨 Identidade visual
@@ -171,6 +169,68 @@ O PrintWorth utiliza uma identidade moderna e tecnológica, com cores relacionad
 | Branco suave | `#F5F8FA` | Fundo da interface |
 
 A experiência visual será desenvolvida com **Compose Multiplatform e Material 3**.
+
+### Identidade da marca
+
+<p align="center">
+  <img src="assets/branding/printworth-logo-light.png" alt="Logotipo PrintWorth em fundo claro" width="42%">
+  &nbsp;&nbsp;
+  <img src="assets/branding/printworth-logo-semfundo.png" alt="Logotipo PrintWorth com fundo transparente" width="42%">
+</p>
+
+<p align="center">
+  <em>Identidade visual oficial do PrintWorth.</em>
+</p>
+
+### Conceito visual
+
+A identidade do aplicativo utiliza um símbolo estilizado em formato de **P**, composto por elementos geométricos em camadas.
+
+O conceito está relacionado à fabricação aditiva, à precisão e ao valor das peças produzidas.
+
+As versões do logotipo e do banner são armazenadas na pasta `assets/branding/`.
+
+---
+
+## 📸 Protótipos da interface
+
+As imagens abaixo representam a proposta visual inicial do aplicativo.
+
+> **Importante:** os protótipos são referências de design. Eles não representam funcionalidades já implementadas ou resultados gerados pela versão atual do aplicativo.
+
+### 🖨️ Fluxo principal do aplicativo
+
+O fluxo visual planejado contempla três etapas:
+
+1. **Impressão:** informações da peça, impressora, filamento e tempo de fabricação.
+2. **Custos:** despesas operacionais, margem de lucro e comissão.
+3. **Resultado:** preço sugerido e detalhamento dos custos.
+
+<p align="center">
+  <img src="assets/screenshots/printworth-flow.png" alt="Protótipo do fluxo do aplicativo PrintWorth em três etapas" width="95%">
+</p>
+
+### 📱 Formulário e tela de resultados
+
+O formulário reunirá as informações necessárias para o cálculo.
+
+A tela de resultados apresentará o preço de venda sugerido, lucro estimado e detalhamento dos custos.
+
+<p align="center">
+  <img src="assets/screenshots/printworth-form-result.png" alt="Protótipo do formulário e da tela de resultados do PrintWorth" width="95%">
+</p>
+
+### 🎯 Objetivos da experiência visual
+
+- Interface clara e intuitiva.
+- Organização lógica das informações.
+- Identidade visual consistente.
+- Componentes acessíveis.
+- Campos identificados com suas unidades.
+- Destaque para preço sugerido e lucro estimado.
+- Navegação simples entre formulário e resultado.
+
+Os protótipos poderão ser refinados durante a implementação no Android Studio.
 
 ---
 
@@ -201,6 +261,16 @@ Estão previstos:
 
 As implementações serão adicionadas progressivamente.
 
+### Princípios de desenvolvimento
+
+- Separação de responsabilidades.
+- Componentização da interface.
+- Código de fácil manutenção.
+- Regras de negócio independentes da interface.
+- Validação de entradas.
+- Testabilidade.
+- Documentação contínua.
+
 ---
 
 ## 📂 Estrutura do projeto
@@ -218,6 +288,16 @@ PrintWorth/
 │   ├── architecture.md
 │   ├── calculation-rules.md
 │   └── requirements.md
+│
+├── assets/
+│   ├── branding/
+│   │   ├── printworth-banner.png
+│   │   ├── printworth-logo-light.png
+│   │   └── printworth-logo-semfundo.png
+│   │
+│   └── screenshots/
+│       ├── printworth-flow.png
+│       └── printworth-form-result.png
 │
 ├── gradle/
 ├── build.gradle.kts
@@ -242,6 +322,10 @@ com.dannyrodrygues.printworth
     ├── calculator
     └── result
 ```
+
+O arquivo `App.kt` será responsável por conectar o fluxo principal da aplicação e aplicar o tema visual.
+
+As fórmulas de cálculo permanecerão na camada de domínio.
 
 ---
 
@@ -296,7 +380,7 @@ O PrintWorth possui documentação dedicada para manter a organização do desen
 | [Arquitetura](docs/architecture.md) | Estrutura de módulos, camadas e responsabilidades |
 | [Regras de cálculo](docs/calculation-rules.md) | Fórmulas, precisão monetária e cenários de teste |
 
-A documentação será atualizada continuamente.
+A documentação será atualizada continuamente conforme as funcionalidades forem desenvolvidas.
 
 ---
 
@@ -311,6 +395,8 @@ A documentação será atualizada continuamente.
 - [x] Documentação inicial de requisitos.
 - [x] Documentação da arquitetura.
 - [x] Especificação das regras de cálculo.
+- [x] Definição da identidade visual.
+- [x] Criação dos protótipos iniciais.
 
 ### 🚧 Etapa 2 — Desenvolvimento
 
@@ -329,6 +415,8 @@ A documentação será atualizada continuamente.
 - [ ] Tratamento de entradas inválidas.
 - [ ] Testes em dispositivo Android.
 - [ ] Revisão de acessibilidade.
+- [ ] Verificação de desempenho.
+- [ ] Revisão da interface.
 
 ### 📦 Etapa 4 — Distribuição
 
