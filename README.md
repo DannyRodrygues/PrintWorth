@@ -411,15 +411,20 @@ A documentação será atualizada continuamente conforme as funcionalidades fore
 - [x] Alternância automática conforme o tema do Android.
 - [x] Testes manuais no Xiaomi Redmi Note 9S.
 
+
 **Calculadora e regras de negócio**
 
+- [x] Implementação dos modelos de domínio.
+- [x] Implementação inicial das regras de cálculo.
+- [x] Operações monetárias com precisão fixa.
+- [x] Testes unitários iniciais do motor de cálculo.
+- [ ] Ampliação dos testes de valores extremos.
 - [ ] Integração do botão "Iniciar cálculo" ao formulário.
-- [ ] Implementação dos modelos de domínio.
-- [ ] Implementação das regras de cálculo.
 - [ ] Desenvolvimento do formulário.
 - [ ] Desenvolvimento da tela de resultados.
 - [ ] Cadastro de impressoras.
 - [ ] Persistência local.
+
 
 
 ### 🧪 Etapa 3 — Qualidade

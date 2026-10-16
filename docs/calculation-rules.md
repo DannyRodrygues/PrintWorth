@@ -192,3 +192,103 @@ não uma especificação de um modelo de impressora.
 - Custos com frações de centavo.
 - Custo base igual a zero.
 - Igualdade entre preço, custos, comissão e lucro.
+
+
+---
+
+## 15. Implementação inicial do motor de cálculo
+
+**Data:** 16/10/2026  
+**Status:** implementação inicial concluída, em validação.
+
+### Arquitetura implementada
+
+A lógica financeira está localizada na camada de domínio,
+independente de componentes Android ou Compose.
+
+**Modelos criados:**
+
+- Money.kt
+- MoneyRate.kt
+- Printer.kt
+- PrintCalculationInput.kt
+- PrintCalculationResult.kt
+
+**Casos de uso e operações:**
+
+- FixedPointMath.kt
+- CalculatePrintCostUseCase.kt
+
+### Precisão monetária
+
+A implementação utiliza aritmética inteira com Long.
+
+- Valores monetários finais são representados em centavos.
+- Valores unitários permitem quatro casas decimais.
+- Percentuais são representados em pontos-base.
+- Operações monetárias não utilizam Float ou Double.
+- Arredondamento HALF_UP nos custos e na comissão.
+- Arredondamento para cima no preço sugerido.
+- Proteção contra estouros numéricos nas operações.
+
+### Funcionalidades implementadas
+
+- Cálculo do custo do filamento.
+- Cálculo do consumo de energia.
+- Cálculo do desgaste da impressora.
+- Inclusão do custo de embalagem.
+- Cálculo do custo base.
+- Aplicação da margem de lucro.
+- Aplicação opcional da comissão.
+- Cálculo do preço de venda sugerido.
+- Cálculo do lucro estimado.
+- Cálculo da margem efetiva.
+- Validação de entradas numéricas.
+
+### Testes automatizados
+
+Classes:
+
+- FixedPointMathTest.kt
+- CalculatePrintCostUseCaseTest.kt
+
+Cenários cobertos incluem:
+
+- Arredondamento HALF_UP.
+- Arredondamento para cima.
+- Detecção de estouros numéricos.
+- Divisão por zero.
+- Exemplo financeiro de referência.
+- Conferência da composição do preço.
+- Comissão ativada e desativada.
+- Validação de margem e comissão.
+- Duração de impressão com minutos.
+- Custos com frações de centavo.
+- Margem zero.
+- Custo base zero.
+- Rejeição de valores negativos.
+
+### Validação
+
+Comando executado:
+
+`./gradlew :shared:testAndroidHostTest`
+
+Resultado observado:
+
+**BUILD SUCCESSFUL**
+
+### Limitações atuais
+
+A implementação ainda precisa de cobertura adicional
+para valores extremos e condições de contorno.
+
+O motor de cálculo ainda não está conectado à interface.
+
+As próximas etapas incluem:
+
+- Ampliação dos testes de domínio.
+- Implementação do formulário.
+- Conversão e validação dos valores digitados.
+- Integração com a tela de resultados.
+- Testes do fluxo completo no Android.
