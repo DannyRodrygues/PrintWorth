@@ -398,15 +398,29 @@ A documentação será atualizada continuamente conforme as funcionalidades fore
 - [x] Definição da identidade visual.
 - [x] Criação dos protótipos iniciais.
 
+
 ### 🚧 Etapa 2 — Desenvolvimento
 
-- [ ] Configuração do fluxo principal em `App.kt`.
+**Interface inicial e identidade visual**
+
+- [x] Implementação da tela inicial em Compose.
+- [x] Integração do logotipo oficial.
+- [x] Aplicação da identidade visual PrintWorth.
+- [x] Implementação do tema Light.
+- [x] Implementação do tema Dark.
+- [x] Alternância automática conforme o tema do Android.
+- [x] Testes manuais no Xiaomi Redmi Note 9S.
+
+**Calculadora e regras de negócio**
+
+- [ ] Integração do botão "Iniciar cálculo" ao formulário.
 - [ ] Implementação dos modelos de domínio.
 - [ ] Implementação das regras de cálculo.
 - [ ] Desenvolvimento do formulário.
 - [ ] Desenvolvimento da tela de resultados.
 - [ ] Cadastro de impressoras.
 - [ ] Persistência local.
+
 
 ### 🧪 Etapa 3 — Qualidade
 
