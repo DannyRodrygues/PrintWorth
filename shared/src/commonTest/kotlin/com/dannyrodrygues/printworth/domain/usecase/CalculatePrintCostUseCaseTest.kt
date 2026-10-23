@@ -9,6 +9,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNull
+import com.dannyrodrygues.printworth.domain.model.PricingMethod
 
 class CalculatePrintCostUseCaseTest {
 
@@ -35,7 +36,7 @@ class CalculatePrintCostUseCaseTest {
     )
 
     @Test
-    fun referenceExampleProducesExpectedValues() {
+    fun referenceExampleUsesProfitOverCost() {
         val result = useCase(sampleInput())
 
         assertEquals(1_000L, result.filamentCost.cents)
@@ -43,14 +44,58 @@ class CalculatePrintCostUseCaseTest {
         assertEquals(500L, result.printerWearCost.cents)
         assertEquals(200L, result.packagingCost.cents)
         assertEquals(1_775L, result.baseCost.cents)
-        assertEquals(2_536L, result.suggestedSalePrice.cents)
-        assertEquals(254L, result.commissionAmount.cents)
-        assertEquals(507L, result.estimatedProfit.cents)
-        assertEquals(1_999, result.effectiveMarginBasisPoints)
+
+        // Lucro de 20% sobre o custo e comissão de 10%.
+        assertEquals(2_367L, result.suggestedSalePrice.cents)
+        assertEquals(237L, result.commissionAmount.cents)
+        assertEquals(355L, result.estimatedProfit.cents)
+        assertEquals(1_500, result.effectiveMarginBasisPoints)
     }
 
     @Test
-    fun priceEqualsCostsCommissionAndProfit() {
+    fun acceptsOneHundredPercentProfitWithoutCommission() {
+        val input = sampleInput().copy(
+            profitMarginBasisPoints = 10_000,
+            commissionEnabled = false
+        )
+
+        val result = useCase(input)
+
+        assertEquals(1_775L, result.baseCost.cents)
+        assertEquals(3_550L, result.suggestedSalePrice.cents)
+        assertEquals(0L, result.commissionAmount.cents)
+        assertEquals(1_775L, result.estimatedProfit.cents)
+    }
+
+    @Test
+    fun preservesOneHundredPercentProfitWithCommission() {
+        val input = sampleInput().copy(
+            profitMarginBasisPoints = 10_000
+        )
+
+        val result = useCase(input)
+
+        assertEquals(1_775L, result.baseCost.cents)
+        assertEquals(3_945L, result.suggestedSalePrice.cents)
+        assertEquals(395L, result.commissionAmount.cents)
+        assertEquals(1_775L, result.estimatedProfit.cents)
+    }
+
+    @Test
+    fun acceptsTwoHundredPercentProfit() {
+        val input = sampleInput().copy(
+            profitMarginBasisPoints = 20_000,
+            commissionEnabled = false
+        )
+
+        val result = useCase(input)
+
+        assertEquals(5_325L, result.suggestedSalePrice.cents)
+        assertEquals(3_550L, result.estimatedProfit.cents)
+    }
+
+    @Test
+    fun priceEqualsCostsPlusCommissionPlusProfit() {
         val result = useCase(sampleInput())
 
         assertEquals(
@@ -70,14 +115,14 @@ class CalculatePrintCostUseCaseTest {
         val result = useCase(input)
 
         assertEquals(0L, result.commissionAmount.cents)
-        assertEquals(2_219L, result.suggestedSalePrice.cents)
+        assertEquals(2_130L, result.suggestedSalePrice.cents)
+        assertEquals(355L, result.estimatedProfit.cents)
     }
 
     @Test
-    fun rejectsMarginAndCommissionAtOneHundredPercent() {
+    fun rejectsCommissionAtOneHundredPercent() {
         val input = sampleInput().copy(
-            profitMarginBasisPoints = 9_000,
-            commissionBasisPoints = 1_000
+            commissionBasisPoints = 10_000
         )
 
         assertFailsWith<IllegalArgumentException> {
@@ -113,7 +158,6 @@ class CalculatePrintCostUseCaseTest {
         assertNull(result.effectiveMarginBasisPoints)
     }
 
-
     @Test
     fun calculatesFractionalPrintDurationCorrectly() {
         val input = sampleInput().copy(
@@ -125,10 +169,10 @@ class CalculatePrintCostUseCaseTest {
 
         assertEquals(38L, result.energyCost.cents)
         assertEquals(250L, result.printerWearCost.cents)
-        assertEquals(1488L, result.baseCost.cents)
-        assertEquals(2126L, result.suggestedSalePrice.cents)
-        assertEquals(213L, result.commissionAmount.cents)
-        assertEquals(425L, result.estimatedProfit.cents)
+        assertEquals(1_488L, result.baseCost.cents)
+        assertEquals(1_985L, result.suggestedSalePrice.cents)
+        assertEquals(199L, result.commissionAmount.cents)
+        assertEquals(298L, result.estimatedProfit.cents)
     }
 
     @Test
@@ -143,7 +187,7 @@ class CalculatePrintCostUseCaseTest {
     }
 
     @Test
-    fun zeroMarginWithoutCommissionProducesNoProfit() {
+    fun zeroProfitWithoutCommissionUsesBaseCost() {
         val input = sampleInput().copy(
             profitMarginBasisPoints = 0,
             commissionEnabled = false
@@ -168,6 +212,97 @@ class CalculatePrintCostUseCaseTest {
         assertFailsWith<IllegalArgumentException> {
             useCase(input)
         }
+    }
+
+
+    @Test
+    fun costMarkupOfOneHundredPercentDoublesCost() {
+        val input = sampleInput().copy(
+            pricingMethod = PricingMethod.COST_MARKUP,
+            profitMarginBasisPoints = 10_000,
+            commissionEnabled = false
+        )
+
+        val result = useCase(input)
+
+        assertEquals(1_775L, result.baseCost.cents)
+        assertEquals(3_550L, result.suggestedSalePrice.cents)
+        assertEquals(1_775L, result.estimatedProfit.cents)
+    }
+
+    @Test
+    fun saleMarginOfFiftyPercentDoublesCost() {
+        val input = sampleInput().copy(
+            pricingMethod = PricingMethod.SALE_MARGIN,
+            profitMarginBasisPoints = 5_000,
+            commissionEnabled = false
+        )
+
+        val result = useCase(input)
+
+        assertEquals(1_775L, result.baseCost.cents)
+        assertEquals(3_550L, result.suggestedSalePrice.cents)
+        assertEquals(1_775L, result.estimatedProfit.cents)
+        assertEquals(5_000, result.effectiveMarginBasisPoints)
+    }
+
+    @Test
+    fun saleMarginIncludesCommission() {
+        val input = sampleInput().copy(
+            pricingMethod = PricingMethod.SALE_MARGIN,
+            profitMarginBasisPoints = 2_000,
+            commissionEnabled = true,
+            commissionBasisPoints = 1_000
+        )
+
+        val result = useCase(input)
+
+        assertEquals(2_536L, result.suggestedSalePrice.cents)
+        assertEquals(254L, result.commissionAmount.cents)
+        assertEquals(507L, result.estimatedProfit.cents)
+    }
+
+    @Test
+    fun saleMarginAtOneHundredPercentIsRejected() {
+        val input = sampleInput().copy(
+            pricingMethod = PricingMethod.SALE_MARGIN,
+            profitMarginBasisPoints = 10_000,
+            commissionEnabled = false
+        )
+
+        assertFailsWith<IllegalArgumentException> {
+            useCase(input)
+        }
+    }
+
+    @Test
+    fun saleMarginPlusCommissionAtOneHundredPercentIsRejected() {
+        val input = sampleInput().copy(
+            pricingMethod = PricingMethod.SALE_MARGIN,
+            profitMarginBasisPoints = 9_000,
+            commissionEnabled = true,
+            commissionBasisPoints = 1_000
+        )
+
+        assertFailsWith<IllegalArgumentException> {
+            useCase(input)
+        }
+    }
+
+    @Test
+    fun costMarkupAllowsOneHundredPercentWithCommission() {
+        val input = sampleInput().copy(
+            pricingMethod = PricingMethod.COST_MARKUP,
+            profitMarginBasisPoints = 10_000,
+            commissionEnabled = true,
+            commissionBasisPoints = 1_000
+        )
+
+        val result = useCase(input)
+
+        assertEquals(3_945L, result.suggestedSalePrice.cents)
+        assertEquals(395L, result.commissionAmount.cents)
+        assertEquals(1_775L, result.estimatedProfit.cents)
     }
 
 }

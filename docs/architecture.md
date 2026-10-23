@@ -321,16 +321,26 @@ O layout utiliza espaçamento, alinhamento centralizado
 e conteúdo rolável para adaptação a diferentes alturas
 de tela.
 
-### 15.4 Comportamento atual
 
-O botão "Iniciar cálculo" apresenta um AlertDialog
-temporário.
+### 15.4 Evolução do comportamento
 
-O formulário, a navegação e os cálculos ainda não
-foram implementados.
+A tela inicial foi implementada originalmente com
+um diálogo temporário no botão "Iniciar cálculo".
 
-O diálogo será substituído pela navegação para a
-calculadora quando essa funcionalidade estiver pronta.
+Esse diálogo foi substituído pela navegação
+para a calculadora.
+
+O fluxo atual permite:
+
+- Abrir a calculadora pela tela inicial.
+- Preencher as etapas Impressão e Custos.
+- Visualizar o resultado financeiro.
+- Retornar à edição preservando os dados.
+- Iniciar um novo cálculo.
+- Abrir a seção educativa Sobre o PrintWorth.
+
+A identidade visual da tela inicial foi preservada.
+
 
 ---
 
@@ -463,18 +473,262 @@ a navegação e as telas da calculadora.
 
 ---
 
-## 18. Próximas implementações
 
-- [ ] Modelos da camada de domínio.
-- [ ] Representação monetária com precisão adequada.
-- [ ] Caso de uso para cálculo de custos e preços.
-- [ ] Testes unitários das regras de negócio.
-- [ ] Formulário de dados da impressão.
-- [ ] Tela de resultados.
-- [ ] Integração do botão "Iniciar cálculo".
-- [ ] Cadastro e persistência de impressoras.
-- [ ] Testes de acessibilidade e diferentes tamanhos de tela.
+## 18. Estado atual da implementação
 
-A implementação seguirá as regras definidas em
-`docs/calculation-rules.md` e os requisitos documentados
-em `docs/requirements.md`.
+**Revisão:** 23/10/2026
+
+### Funcionalidades implementadas
+
+- [x] Modelos da camada de domínio.
+- [x] Representação monetária com precisão fixa.
+- [x] Motor de cálculo financeiro.
+- [x] Método de lucro sobre o custo.
+- [x] Método de margem sobre a venda.
+- [x] Comissão opcional.
+- [x] Testes unitários iniciais.
+- [x] Conversão de entradas decimais.
+- [x] Validação dos campos do formulário.
+- [x] ViewModel com StateFlow.
+- [x] Formulário dividido em duas etapas.
+- [x] Tela de resultados.
+- [x] Navegação entre as etapas.
+- [x] Edição preservando os dados preenchidos.
+- [x] Seção educativa Sobre o PrintWorth.
+- [x] Ajuda contextual dos métodos financeiros.
+- [x] Contato da desenvolvedora por link mailto.
+
+### Funcionalidades pendentes
+
+- [ ] Cadastro de impressoras personalizadas.
+- [ ] Persistência local das impressoras.
+- [ ] Substituição da impressora de demonstração.
+- [ ] Ampliação dos testes de limites numéricos.
+- [ ] Estratégia de restauração após morte do processo.
+- [ ] Testes completos de acessibilidade.
+- [ ] Validação das novas telas no tema Light.
+- [ ] Revisão de navegação e experiência do usuário.
+- [ ] Preparação da distribuição Android.
+
+O salvamento de cálculos permanece como
+funcionalidade futura a ser definida.
+
+---
+
+## 19. Evolução da arquitetura da aplicação
+
+### 19.1 Modelos de domínio
+
+Pacote:
+
+`domain.model`
+
+Arquivos principais:
+
+- Money.kt
+- MoneyRate.kt
+- Printer.kt
+- PrintCalculationInput.kt
+- PrintCalculationResult.kt
+- PricingMethod.kt
+
+A enumeração PricingMethod identifica os
+métodos de formação do preço:
+
+- COST_MARKUP: lucro sobre o custo.
+- SALE_MARGIN: margem sobre a venda.
+
+O método padrão é COST_MARKUP.
+
+### 19.2 Motor financeiro
+
+Pacote:
+
+`domain.usecase`
+
+Arquivos:
+
+- FixedPointMath.kt
+- CalculatePrintCostUseCase.kt
+
+O motor:
+
+- Calcula custos de produção.
+- Aplica o método de precificação selecionado.
+- Considera a comissão opcional.
+- Calcula preço sugerido e lucro estimado.
+- Calcula a margem efetiva sobre a venda.
+- Utiliza aritmética inteira.
+- Aplica regras explícitas de arredondamento.
+
+As regras e exemplos estão documentados em:
+
+`docs/calculation-rules.md`
+
+### 19.3 Camada de apresentação
+
+Pacote:
+
+`presentation.calculator`
+
+Arquivos:
+
+- CalculatorFormState.kt
+- CalculatorViewModel.kt
+- DecimalInputParser.kt
+- CalculatorFormValidator.kt
+- CalculatorScreen.kt
+
+Responsabilidades:
+
+CalculatorFormState:
+Mantém os dados digitados e o método escolhido.
+
+CalculatorViewModel:
+Gerencia o estado observável, as ações do
+formulário, a validação e o resultado do cálculo.
+
+DecimalInputParser:
+Converte entradas decimais para valores
+inteiros com escala fixa.
+
+CalculatorFormValidator:
+Valida os dados e prepara os modelos de domínio.
+
+CalculatorScreen:
+Apresenta as etapas Impressão e Custos,
+os campos e a ajuda contextual.
+
+As fórmulas financeiras permanecem no domínio.
+
+### 19.4 Tela de resultados
+
+Pacote:
+
+`presentation.result`
+
+Arquivo:
+
+- ResultScreen.kt
+
+A tela recebe um PrintCalculationResult
+e apresenta:
+
+- Preço sugerido.
+- Lucro estimado.
+- Margem efetiva.
+- Detalhamento dos custos.
+- Comissão.
+- Ação Editar cálculo.
+- Ação Novo cálculo.
+
+A tela não executa cálculos financeiros.
+
+### 19.5 Seção educativa
+
+Pacote:
+
+`presentation.about`
+
+Arquivo:
+
+- AboutScreen.kt
+
+Responsabilidades:
+
+- Apresentar o funcionamento da calculadora.
+- Explicar os dois métodos de precificação.
+- Oferecer exemplos financeiros.
+- Explicar a comissão e as limitações.
+- Apresentar informações do projeto.
+- Disponibilizar o contato da desenvolvedora.
+
+O contato utiliza um link mailto, aberto
+por aplicativo de e-mail compatível.
+
+A calculadora também possui ajuda contextual
+por meio de um diálogo informativo.
+
+### 19.6 Navegação
+
+O arquivo App.kt aplica o PrintWorthTheme
+e conecta as telas principais:
+
+- Home
+- Calculator
+- Result
+- About
+
+O formulário apresenta duas etapas internas:
+
+1. Impressão.
+2. Custos.
+
+A terceira etapa visual é a tela Resultado.
+
+A navegação inicial utiliza estado Compose
+para selecionar a tela apresentada.
+
+Uma solução de navegação mais estruturada
+poderá ser considerada conforme o projeto crescer.
+
+### 19.7 Estado e ciclo de vida
+
+O CalculatorViewModel utiliza StateFlow
+para expor:
+
+- Dados do formulário.
+- Erros individuais dos campos.
+- Erros gerais.
+- Resultado do cálculo.
+
+O retorno da tela Resultado para a calculadora
+preserva os valores digitados.
+
+A restauração integral após encerramento
+do processo Android ainda não está garantida
+e deverá ser tratada separadamente.
+
+### 19.8 Impressoras
+
+A aplicação utiliza temporariamente uma
+impressora de demonstração para testar
+o fluxo de cálculo.
+
+A potência dessa impressora é ilustrativa
+e não representa uma medição real.
+
+O cadastro e a persistência local serão
+implementados em uma próxima etapa.
+
+### 19.9 Testes e validação
+
+Testes automatizados existentes incluem:
+
+- FixedPointMathTest.kt
+- CalculatePrintCostUseCaseTest.kt
+- DecimalInputParserTest.kt
+- CalculatorFormValidatorTest.kt
+- CalculatorViewModelTest.kt
+
+Comando utilizado:
+
+`./gradlew :shared:testAndroidHostTest`
+
+O aplicativo também foi testado manualmente
+em dispositivo Android físico.
+
+Foram verificados:
+
+- Navegação pelas três etapas.
+- Cálculo sobre o custo.
+- Cálculo de margem sobre a venda.
+- Tratamento de percentuais inválidos.
+- Apresentação dos resultados.
+- Retorno para edição.
+- Seção Sobre o PrintWorth.
+- Abertura do link de contato.
+- Ajuda contextual da precificação.
+
+A validação completa das telas no tema Light
+e os testes de acessibilidade permanecem pendentes.

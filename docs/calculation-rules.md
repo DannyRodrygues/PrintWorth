@@ -1,57 +1,61 @@
-# PrintWorth — Regras de cálculo
 
-Status: especificação inicial
+# PrintWorth — Regras de Cálculo
 
-## 1. Convenções
+**Status:** implementação em desenvolvimento
+**Última atualização:** 23/10/2026
 
-Moeda inicial: real brasileiro (BRL).
+## 1. Objetivo
 
-Unidades:
-- Peso em gramas.
-- Preço do filamento em reais por quilograma.
-- Duração informada em horas e minutos.
-- Potência média em watts.
-- Tarifa de energia em reais por quilowatt-hora.
-- Desgaste em reais por hora.
-- Margem e comissão informadas em percentual.
+O PrintWorth calcula o custo de produção de peças
+impressas em 3D e sugere preços de venda.
 
-Para calcular, dividir os percentuais por 100.
-Exemplo: 20% corresponde a 0,20.
+O aplicativo disponibiliza dois métodos:
 
-## 2. Duração
+1. Lucro sobre o custo (COST_MARKUP).
+2. Margem sobre a venda (SALE_MARGIN).
+
+O método padrão é Lucro sobre o custo.
+
+## 2. Custos considerados
+
+O custo base é formado por:
+
+- Filamento consumido.
+- Energia elétrica.
+- Desgaste e manutenção da impressora.
+- Embalagem opcional.
+
+Outras despesas não são adicionadas automaticamente.
+
+## 3. Custo do filamento
+
+custoFilamento =
+(pesoEmGramas / 1000) * precoPorKg
+
+Exemplo:
+
+100 g a R$ 100,00/kg = R$ 10,00.
+
+O peso deve considerar suportes, brim e outros
+consumos atribuíveis à impressão.
+
+## 4. Energia elétrica
 
 tempoEmHoras = horas + minutos / 60
 
-Exemplo:
-2 horas e 30 minutos = 2,5 horas.
+consumoKWh =
+(potenciaMediaWatts / 1000) * tempoEmHoras
 
-A duração deve ser maior que zero.
+custoEnergia = consumoKWh * tarifaPorKWh
 
-## 3. Filamento
-
-custoFilamento = (pesoEmGramas / 1000) × precoPorKg
-
-Exemplo:
-100 g de filamento a R$ 100,00/kg custam R$ 10,00.
-
-## 4. Energia
-
-consumoEmKWh = (potenciaMediaEmWatts / 1000) × tempoEmHoras
-
-custoEnergia = consumoEmKWh × tarifaPorKWh
-
-A potência é uma estimativa média durante a impressão.
-O consumo real pode variar com temperaturas, materiais,
-ambiente e comportamento da máquina.
+A potência média é informada pelo usuário.
 
 ## 5. Desgaste
 
-custoDesgaste = tempoEmHoras × desgastePorHora
+custoDesgaste =
+tempoEmHoras * desgastePorHora
 
-O desgaste por hora é uma provisão definida pela pessoa para
-depreciação e manutenção da impressora.
-
-O aplicativo não calcula automaticamente essa taxa nesta versão.
+A taxa de desgaste é definida pelo usuário.
 
 ## 6. Embalagem
 
@@ -67,228 +71,265 @@ custoFilamento
 + custoDesgaste
 + custoEmbalagem
 
-## 8. Margem de lucro
+Os componentes são arredondados para centavos
+antes da soma.
 
-A margem representa a parcela do preço de venda que permanece
-como lucro após descontar o custo base e a comissão.
+## 8. Método 1 — Lucro sobre o custo
 
-margem = percentualDeMargem / 100
+Identificador: COST_MARKUP
 
-Não confundir margem com acréscimo sobre o custo.
+Este método acrescenta o percentual desejado
+ao custo de produção.
 
-Exemplo sem comissão:
-- Custo base: R$ 80,00.
-- Margem desejada: 20%.
-- Preço de venda: R$ 100,00.
-- Lucro: R$ 20,00.
+Sem comissão:
 
-Acrescentar 20% ao custo produziria R$ 96,00 e não atenderia
-à margem de 20% sobre a venda.
+precoVenda =
+custoBase * (1 + percentualLucro / 100)
 
-## 9. Comissão
+Exemplo:
 
-comissao = percentualDeComissao / 100
+- Custo base: R$ 20,00.
+- Lucro desejado: 100%.
+- Preço sugerido: R$ 40,00.
+- Lucro estimado: R$ 20,00.
 
-A comissão incide sobre o preço de venda.
+Esse método aceita percentuais de 100%, 200%
+ou superiores, dentro dos limites numéricos
+do aplicativo.
 
-Quando a opção estiver desativada, considerar comissão zero,
-mesmo que exista um percentual anteriormente preenchido.
+## 9. Método 2 — Margem sobre a venda
 
-## 10. Preço de venda
+Identificador: SALE_MARGIN
 
-precoDeVenda = custoBase / (1 - margem - comissao)
+Este método determina quanto do preço final
+de venda deverá sobrar após os custos informados
+e a comissão.
 
-Condições:
-- Margem maior ou igual a zero.
-- Comissão maior ou igual a zero.
-- Margem + comissão inferior a 1.
+Sem comissão:
 
-Uma soma igual ou superior a 100% é inválida.
+precoVenda =
+custoBase / (1 - margem / 100)
 
-## 11. Lucro estimado
+Exemplo:
 
-valorComissao = precoDeVenda × comissao
+- Custo base: R$ 20,00.
+- Margem desejada: 50%.
+- Preço sugerido: R$ 40,00.
+- Lucro estimado: R$ 20,00.
 
-lucroEstimado = precoDeVenda - custoBase - valorComissao
+Uma margem de 100% não é possível quando
+existe custo de produção positivo.
 
-O lucro considera somente os custos incluídos no cálculo.
+A margem desejada deve ser inferior a 100%.
 
-## 12. Precisão e arredondamento
+## 10. Diferença entre os dois métodos
 
-A implementação deverá usar representação decimal adequada
-ou inteiros com escala definida para os valores monetários.
+Considere:
 
-Não utilizar Float ou Double como representação do dinheiro
-nas regras de negócio.
+- Custo base: R$ 20,00.
+- Preço de venda: R$ 40,00.
+- Lucro estimado: R$ 20,00.
 
-Política inicial:
-1. Calcular cada componente sem arredondar etapas intermediárias.
-2. Arredondar cada custo final para centavos usando HALF_UP.
-3. Somar esses componentes para obter o custo base.
-4. Calcular o preço e arredondá-lo para cima até o centavo.
-5. Calcular a comissão sobre o preço já arredondado.
-6. Arredondar a comissão para centavos usando HALF_UP.
-7. Obter o lucro por subtração dos valores finais.
+Lucro sobre o custo:
 
-HALF_UP:
-Quando o valor estiver exatamente no meio, arredondar para cima.
-Exemplo: R$ 1,235 passa a R$ 1,24.
+20 / 20 * 100 = 100%
 
-Essa política mantém a igualdade entre os valores exibidos:
-preço de venda = custo base + comissão + lucro.
+Margem sobre a venda:
 
-A margem efetiva pode diferir ligeiramente da margem desejada
-por causa do arredondamento.
+20 / 40 * 100 = 50%
 
-margemEfetiva = (lucroEstimado / precoDeVenda) × 100
+Os dois percentuais estão corretos.
 
-Se o preço for zero, a margem efetiva será apresentada como
-"Não se aplica", evitando divisão por zero.
+A diferença é a base utilizada para
+calcular o percentual.
 
-## 13. Exemplo de referência
+## 11. Comissão do ponto de venda
 
-Entradas:
-- Peso: 100 g.
-- Filamento: R$ 100,00/kg.
-- Duração: 5 horas.
-- Potência média: 150 W.
-- Energia: R$ 1,00/kWh.
-- Desgaste: R$ 1,00/h.
-- Embalagem: R$ 2,00.
-- Margem: 20%.
+A comissão é opcional e incide sobre
+o preço final de venda.
+
+Quando desativada, seu valor é zero.
+
+A comissão deve ser maior ou igual a zero
+e inferior a 100%.
+
+### Comissão no método Sobre o custo
+
+precoVenda =
+[custoBase * (1 + lucro / 100)]
+/ (1 - comissao / 100)
+
+### Comissão no método Sobre a venda
+
+precoVenda =
+custoBase
+/ (1 - margem / 100 - comissao / 100)
+
+No método Sobre a venda:
+
+margem + comissao < 100%
+
+Se a soma atingir ou ultrapassar 100%,
+o cálculo será rejeitado.
+
+## 12. Lucro estimado
+
+valorComissao =
+precoVenda * comissao / 100
+
+lucroEstimado =
+precoVenda - custoBase - valorComissao
+
+O lucro estimado considera somente
+os custos informados e a comissão.
+
+Não deve ser confundido automaticamente
+com o lucro líquido da empresa.
+
+## 13. Margem efetiva
+
+Independentemente do método escolhido,
+o resultado apresenta a margem efetiva
+sobre o preço de venda.
+
+margemEfetiva =
+(lucroEstimado / precoVenda) * 100
+
+Quando o preço de venda for zero,
+a margem efetiva será considerada
+não aplicável.
+
+## 14. Precisão monetária
+
+O aplicativo utiliza aritmética inteira.
+
+Representações:
+
+- Valores monetários finais em centavos.
+- Preços unitários com quatro casas decimais.
+- Percentuais em pontos-base.
+- 100 pontos-base representam 1%.
+- 10.000 pontos-base representam 100%.
+
+Não utilizar Float ou Double para
+representar valores monetários.
+
+Política de arredondamento:
+
+1. Custos individuais: HALF_UP.
+2. Custo base: soma dos custos arredondados.
+3. Receita líquida mínima no COST_MARKUP:
+   arredondamento para cima.
+4. Preço sugerido: arredondamento para cima.
+5. Comissão: HALF_UP.
+6. Lucro: diferença entre preço, custos e comissão.
+
+A implementação deve manter a igualdade:
+
+precoVenda =
+custoBase + comissao + lucroEstimado
+
+Valores que excedam os limites numéricos
+suportados devem ser tratados como erro.
+
+A ampliação dos testes de valores extremos
+permanece pendente.
+
+## 15. Exemplos de referência
+
+Considere o custo base de R$ 17,75.
+
+### Exemplo A — Sobre o custo
+
+- Lucro desejado: 100%.
+- Comissão: desativada.
+- Preço sugerido: R$ 35,50.
+- Lucro estimado: R$ 17,75.
+- Margem efetiva: 50%.
+
+### Exemplo B — Sobre o custo com comissão
+
+- Lucro desejado: 100%.
 - Comissão: 10%.
+- Preço sugerido: R$ 39,45.
+- Comissão calculada: R$ 3,95.
+- Lucro estimado: R$ 17,75.
 
-Custos:
-- Filamento: R$ 10,00.
-- Energia: R$ 0,75.
-- Desgaste: R$ 5,00.
-- Embalagem: R$ 2,00.
-- Custo base: R$ 17,75.
+### Exemplo C — Sobre a venda
 
-Preço antes do arredondamento:
-17,75 / (1 - 0,20 - 0,10) = 25,357142...
-
-Resultado:
+- Margem desejada: 20%.
+- Comissão: 10%.
 - Preço sugerido: R$ 25,36.
-- Comissão: R$ 2,54.
+- Comissão calculada: R$ 2,54.
 - Lucro estimado: R$ 5,07.
+- Margem efetiva após arredondamento: 19,99%.
 
-Conferência:
-17,75 + 2,54 + 5,07 = 25,36.
+## 16. Validações principais
 
-A potência deste exemplo é apenas um dado de teste,
-não uma especificação de um modelo de impressora.
+- Peso do filamento maior que zero.
+- Tempo total maior que zero.
+- Minutos entre 0 e 59.
+- Potência média positiva.
+- Custos não negativos.
+- Percentual desejado não negativo.
+- Comissão inferior a 100%.
+- Margem + comissão inferior a 100%
+  quando utilizado SALE_MARGIN.
+- Entradas numéricas válidas.
+- Proteção contra operações numéricas
+  que excedam os limites suportados.
 
-## 14. Cenários obrigatórios de teste
+## 17. Implementação técnica
 
-- Cálculo completo do exemplo de referência.
-- Cálculo sem embalagem e sem comissão.
-- Conversão de horas e minutos.
-- Margem zero.
-- Comissão ativada e desativada.
-- Soma de margem e comissão igual ou superior a 100%.
-- Peso ou duração igual a zero.
-- Valores negativos.
-- Custos com frações de centavo.
-- Custo base igual a zero.
-- Igualdade entre preço, custos, comissão e lucro.
+Modelos e componentes principais:
 
-
----
-
-## 15. Implementação inicial do motor de cálculo
-
-**Data:** 16/10/2026  
-**Status:** implementação inicial concluída, em validação.
-
-### Arquitetura implementada
-
-A lógica financeira está localizada na camada de domínio,
-independente de componentes Android ou Compose.
-
-**Modelos criados:**
-
-- Money.kt
-- MoneyRate.kt
-- Printer.kt
+- PricingMethod.kt
 - PrintCalculationInput.kt
 - PrintCalculationResult.kt
-
-**Casos de uso e operações:**
-
+- Money.kt
+- MoneyRate.kt
 - FixedPointMath.kt
 - CalculatePrintCostUseCase.kt
+- CalculatorFormValidator.kt
+- CalculatorViewModel.kt
 
-### Precisão monetária
-
-A implementação utiliza aritmética inteira com Long.
-
-- Valores monetários finais são representados em centavos.
-- Valores unitários permitem quatro casas decimais.
-- Percentuais são representados em pontos-base.
-- Operações monetárias não utilizam Float ou Double.
-- Arredondamento HALF_UP nos custos e na comissão.
-- Arredondamento para cima no preço sugerido.
-- Proteção contra estouros numéricos nas operações.
-
-### Funcionalidades implementadas
-
-- Cálculo do custo do filamento.
-- Cálculo do consumo de energia.
-- Cálculo do desgaste da impressora.
-- Inclusão do custo de embalagem.
-- Cálculo do custo base.
-- Aplicação da margem de lucro.
-- Aplicação opcional da comissão.
-- Cálculo do preço de venda sugerido.
-- Cálculo do lucro estimado.
-- Cálculo da margem efetiva.
-- Validação de entradas numéricas.
-
-### Testes automatizados
-
-Classes:
+Testes automatizados:
 
 - FixedPointMathTest.kt
 - CalculatePrintCostUseCaseTest.kt
+- DecimalInputParserTest.kt
+- CalculatorFormValidatorTest.kt
+- CalculatorViewModelTest.kt
 
-Cenários cobertos incluem:
+Comando:
 
-- Arredondamento HALF_UP.
-- Arredondamento para cima.
-- Detecção de estouros numéricos.
-- Divisão por zero.
-- Exemplo financeiro de referência.
-- Conferência da composição do preço.
-- Comissão ativada e desativada.
-- Validação de margem e comissão.
-- Duração de impressão com minutos.
-- Custos com frações de centavo.
-- Margem zero.
-- Custo base zero.
-- Rejeição de valores negativos.
+./gradlew :shared:testAndroidHostTest
 
-### Validação
+## 18. Interface e orientação ao usuário
 
-Comando executado:
+O formulário oferece a escolha:
 
-`./gradlew :shared:testAndroidHostTest`
+- Sobre o custo.
+- Sobre a venda.
 
-Resultado observado:
+Há uma ajuda contextual explicando
+a diferença entre os dois métodos.
 
-**BUILD SUCCESSFUL**
+A seção "Sobre o PrintWorth" apresenta
+explicações educativas, exemplos e
+limitações dos cálculos.
 
-### Limitações atuais
+## 19. Limitações atuais
 
-A implementação ainda precisa de cobertura adicional
-para valores extremos e condições de contorno.
+O aplicativo ainda não inclui
+automaticamente:
 
-O motor de cálculo ainda não está conectado à interface.
+- Impostos.
+- Mão de obra.
+- Frete.
+- Aluguel.
+- Falhas e perdas de impressão.
+- Outras despesas operacionais.
 
-As próximas etapas incluem:
-
-- Ampliação dos testes de domínio.
-- Implementação do formulário.
-- Conversão e validação dos valores digitados.
-- Integração com a tela de resultados.
-- Testes do fluxo completo no Android.
+O resultado deve ser interpretado como
+uma estimativa baseada nos dados fornecidos.

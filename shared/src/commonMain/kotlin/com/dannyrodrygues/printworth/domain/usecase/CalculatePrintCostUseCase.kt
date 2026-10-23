@@ -2,14 +2,21 @@
 package com.dannyrodrygues.printworth.domain.usecase
 
 import com.dannyrodrygues.printworth.domain.model.Money
+import com.dannyrodrygues.printworth.domain.model.PricingMethod
 import com.dannyrodrygues.printworth.domain.model.PrintCalculationInput
 import com.dannyrodrygues.printworth.domain.model.PrintCalculationResult
 
 /**
- * Calcula custos e preço sugerido de uma impressão 3D.
+ * Calcula os custos de uma impressão 3D e sugere
+ * o preço de venda conforme o método selecionado.
  *
- * Utiliza aritmética inteira e arredondamento explícito.
- * Não depende do Android nem do Compose.
+ * Métodos:
+ * - COST_MARKUP: lucro sobre o custo.
+ * - SALE_MARGIN: margem sobre o preço de venda.
+ *
+ * A comissão opcional incide sobre o preço de venda.
+ *
+ * Utiliza aritmética inteira, sem Float ou Double.
  */
 class CalculatePrintCostUseCase {
 
@@ -19,12 +26,14 @@ class CalculatePrintCostUseCase {
 
         validate(input)
 
-        val totalMinutes = FixedPointMath.addExactNonNegative(
-            input.printHours.toLong() * 60L,
-            input.printMinutes.toLong()
-        )
+        // Duração total em minutos.
+        val totalMinutes =
+            FixedPointMath.addExactNonNegative(
+                input.printHours.toLong() * 60L,
+                input.printMinutes.toLong()
+            )
 
-        // Filamento: centigramas e preço por quilograma.
+        // Custo do filamento.
         val filamentCost = Money(
             FixedPointMath.multiplyDivideHalfUp(
                 input.filamentWeightCentigrams,
@@ -33,12 +42,13 @@ class CalculatePrintCostUseCase {
             )
         )
 
-        // Energia: potência média, tempo e tarifa por kWh.
+        // Potência multiplicada pela duração.
         val powerMinutes = multiplyExactNonNegative(
             input.averagePowerWatts.toLong(),
             totalMinutes
         )
 
+        // Custo de energia elétrica.
         val energyCost = Money(
             FixedPointMath.multiplyDivideHalfUp(
                 powerMinutes,
@@ -47,7 +57,7 @@ class CalculatePrintCostUseCase {
             )
         )
 
-        // Desgaste proporcional à duração.
+        // Custo de desgaste da impressora.
         val printerWearCost = Money(
             FixedPointMath.multiplyDivideHalfUp(
                 totalMinutes,
@@ -56,21 +66,25 @@ class CalculatePrintCostUseCase {
             )
         )
 
+        // Custo opcional da embalagem.
         val packagingCost = input.packagingCost
 
-        // Soma segura dos custos finais arredondados.
+        // Soma dos componentes arredondados.
         val baseCostCents = listOf(
             filamentCost.cents,
             energyCost.cents,
             printerWearCost.cents,
             packagingCost.cents
         ).fold(0L) { total, cost ->
-            FixedPointMath.addExactNonNegative(total, cost)
+            FixedPointMath.addExactNonNegative(
+                total,
+                cost
+            )
         }
 
         val baseCost = Money(baseCostCents)
 
-        // Comissão desativada não participa do cálculo.
+        // Comissão desativada é sempre zero.
         val commissionBasisPoints =
             if (input.commissionEnabled) {
                 input.commissionBasisPoints
@@ -78,24 +92,90 @@ class CalculatePrintCostUseCase {
                 0
             }
 
-        // 10000 pontos-base representam 100%.
-        val denominator = (
-                10_000 -
-                        input.profitMarginBasisPoints -
-                        commissionBasisPoints
-                ).toLong()
+        /*
+         * O nome profitMarginBasisPoints foi mantido
+         * temporariamente para compatibilidade.
+         *
+         * Seu significado depende do método:
+         *
+         * COST_MARKUP:
+         * Percentual de lucro sobre o custo.
+         *
+         * SALE_MARGIN:
+         * Margem desejada sobre o preço de venda.
+         */
+        val desiredPercentageBasisPoints =
+            input.profitMarginBasisPoints.toLong()
 
-        // Preço arredondado para cima até o centavo.
-        val salePriceCents =
-            FixedPointMath.multiplyDivideCeiling(
-                baseCost.cents,
-                10_000L,
-                denominator
-            )
+        // Denominador para compensar a comissão.
+        val commissionDenominator =
+            10_000L - commissionBasisPoints.toLong()
+
+        // Calcula o preço segundo o método escolhido.
+        val salePriceCents = when (input.pricingMethod) {
+
+            PricingMethod.COST_MARKUP -> {
+
+                /*
+                 * Lucro sobre o custo.
+                 *
+                 * Exemplo sem comissão:
+                 * Custo = R$ 20,00
+                 * Lucro = 100%
+                 * Venda = R$ 40,00
+                 */
+
+                val multiplier =
+                    FixedPointMath.addExactNonNegative(
+                        10_000L,
+                        desiredPercentageBasisPoints
+                    )
+
+                val minimumNetRevenueCents =
+                    FixedPointMath.multiplyDivideCeiling(
+                        baseCost.cents,
+                        multiplier,
+                        10_000L
+                    )
+
+                // Compensa a comissão, quando ativada.
+                FixedPointMath.multiplyDivideCeiling(
+                    minimumNetRevenueCents,
+                    10_000L,
+                    commissionDenominator
+                )
+            }
+
+            PricingMethod.SALE_MARGIN -> {
+
+                /*
+                 * Margem sobre a venda.
+                 *
+                 * Preço =
+                 * custo / (1 - margem - comissão)
+                 *
+                 * Exemplo sem comissão:
+                 * Custo = R$ 20,00
+                 * Margem = 50%
+                 * Venda = R$ 40,00
+                 */
+
+                val denominator =
+                    10_000L -
+                            desiredPercentageBasisPoints -
+                            commissionBasisPoints.toLong()
+
+                FixedPointMath.multiplyDivideCeiling(
+                    baseCost.cents,
+                    10_000L,
+                    denominator
+                )
+            }
+        }
 
         val suggestedSalePrice = Money(salePriceCents)
 
-        // Comissão calculada sobre o preço arredondado.
+        // Comissão sobre o preço arredondado.
         val commissionCents =
             FixedPointMath.multiplyDivideHalfUp(
                 salePriceCents,
@@ -105,22 +185,26 @@ class CalculatePrintCostUseCase {
 
         val commissionAmount = Money(commissionCents)
 
-        // Confere a integridade da operação.
+        // Valor disponível após subtrair os custos.
         val remainingAfterCosts =
             salePriceCents - baseCost.cents
 
         if (commissionCents > remainingAfterCosts) {
             throw ArithmeticException(
-                "Comissão superior ao valor disponível."
+                "A comissão excede o valor disponível."
             )
         }
 
+        // Lucro estimado após custos e comissão.
         val profitCents =
             remainingAfterCosts - commissionCents
 
         val estimatedProfit = Money(profitCents)
 
-        // Margem efetiva após os arredondamentos.
+        /*
+         * Margem efetiva sobre o preço de venda.
+         * É calculada para ambos os métodos.
+         */
         val effectiveMarginBasisPoints =
             if (salePriceCents == 0L) {
                 null
@@ -142,10 +226,14 @@ class CalculatePrintCostUseCase {
             suggestedSalePrice = suggestedSalePrice,
             commissionAmount = commissionAmount,
             estimatedProfit = estimatedProfit,
-            effectiveMarginBasisPoints = effectiveMarginBasisPoints
+            effectiveMarginBasisPoints =
+                effectiveMarginBasisPoints
         )
     }
 
+    /**
+     * Validação das regras de domínio.
+     */
     private fun validate(input: PrintCalculationInput) {
 
         require(input.filamentWeightCentigrams > 0L) {
@@ -198,34 +286,55 @@ class CalculatePrintCostUseCase {
         }
 
         require(input.profitMarginBasisPoints >= 0) {
-            "A margem não pode ser negativa."
+            "O percentual desejado não pode ser negativo."
         }
 
-        val commission = if (input.commissionEnabled) {
-            input.commissionBasisPoints
-        } else {
-            0
+        val commission =
+            if (input.commissionEnabled) {
+                input.commissionBasisPoints
+            } else {
+                0
+            }
+
+        require(commission in 0 until 10_000) {
+            "A comissão deve ser menor que 100%."
         }
 
-        require(commission >= 0) {
-            "A comissão não pode ser negativa."
-        }
+        /*
+         * Somente o método SALE_MARGIN exige
+         * que margem + comissão seja menor que 100%.
+         *
+         * COST_MARKUP aceita lucros de 100% ou mais.
+         */
+        if (input.pricingMethod == PricingMethod.SALE_MARGIN) {
 
-        require(
-            input.profitMarginBasisPoints.toLong() +
-                    commission.toLong() < 10_000L
-        ) {
-            "A soma da margem e comissão deve ser inferior a 100%."
+            require(
+                input.profitMarginBasisPoints.toLong() +
+                        commission.toLong() < 10_000L
+            ) {
+                "A soma da margem sobre a venda e da " +
+                        "comissão deve ser inferior a 100%."
+            }
         }
     }
 
+    /**
+     * Multiplica dois valores não negativos,
+     * detectando estouro de Long.
+     */
     private fun multiplyExactNonNegative(
         first: Long,
         second: Long
     ): Long {
-        require(first >= 0L && second >= 0L)
 
-        if (first != 0L && second > Long.MAX_VALUE / first) {
+        require(first >= 0L && second >= 0L) {
+            "Os valores devem ser não negativos."
+        }
+
+        if (
+            first != 0L &&
+            second > Long.MAX_VALUE / first
+        ) {
             throw ArithmeticException(
                 "Estouro numérico na multiplicação."
             )

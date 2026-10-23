@@ -47,5 +47,8 @@ data class PrintCalculationInput(
 
     // Comissão opcional
     val commissionEnabled: Boolean = false,
-    val commissionBasisPoints: Int = 0
+    val commissionBasisPoints: Int = 0,
+
+    // Método de formação do preço
+    val pricingMethod: PricingMethod = PricingMethod.COST_MARKUP
 )

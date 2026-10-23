@@ -98,15 +98,82 @@ Custo base =
   + Embalagem
 ```
 
+
 ### 5. Preço de venda sugerido
 
+O PrintWorth oferece dois métodos de precificação.
+
+#### Método 1 — Lucro sobre o custo (Markup)
+
+Calcula um acréscimo percentual sobre o custo
+de produção da peça.
+
 ```text
-Preço de venda = Custo base / (1 - Margem - Comissão)
+Preço sem comissão =
+    Custo base × (1 + Lucro desejado / 100)
 ```
 
-A margem e a comissão devem ser convertidas de porcentagens para frações decimais.
+Exemplo:
 
-A soma da margem com a comissão deve ser inferior a 100%.
+- Custo de produção: R$ 20,00.
+- Lucro desejado: 100%.
+- Preço sugerido: R$ 40,00.
+- Lucro estimado: R$ 20,00.
+
+Esse método permite percentuais iguais ou superiores
+a 100%, respeitando os limites numéricos do aplicativo.
+
+#### Método 2 — Margem sobre a venda
+
+Calcula o preço necessário para que o lucro
+represente uma determinada parcela do valor vendido.
+
+```text
+Preço sem comissão =
+    Custo base / (1 - Margem desejada / 100)
+```
+
+Exemplo:
+
+- Custo de produção: R$ 20,00.
+- Margem desejada: 50%.
+- Preço sugerido: R$ 40,00.
+- Lucro estimado: R$ 20,00.
+
+A margem sobre a venda deve ser inferior a 100%.
+
+#### Comissão opcional
+
+A comissão é calculada sobre o preço final.
+
+Com comissão ativada, as fórmulas são:
+
+**Sobre o custo:**
+
+```text
+Preço =
+    [Custo base × (1 + Lucro desejado / 100)]
+    / (1 - Comissão / 100)
+```
+
+**Sobre a venda:**
+
+```text
+Preço =
+    Custo base
+    / (1 - Margem / 100 - Comissão / 100)
+```
+
+No método Sobre a venda, a soma da margem
+com a comissão deve ser inferior a 100%.
+
+O aplicativo utiliza aritmética inteira e regras
+específicas de arredondamento para preservar
+a consistência dos valores monetários.
+
+As duas modalidades exibem o lucro estimado
+após descontar os custos informados e a comissão.
+
 
 ### 6. Lucro estimado
 
@@ -126,6 +193,11 @@ Lucro estimado =
 ## 📊 Exemplo de cálculo
 
 Considere uma peça impressa com os seguintes dados:
+
+
+Neste exemplo, utilizamos o método **Sobre a venda**,
+com margem desejada de 20% e comissão de 10%.
+
 
 | Parâmetro | Valor |
 |---|---|
