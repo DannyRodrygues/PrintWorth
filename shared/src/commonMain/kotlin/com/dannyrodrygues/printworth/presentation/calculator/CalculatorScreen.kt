@@ -84,6 +84,7 @@ fun CalculatorScreen(
     printers: List<Printer>,
     onBack: () -> Unit,
     onCalculated: () -> Unit,
+    onManagePrinters: () -> Unit,
     modifier: Modifier = Modifier
 ) {
 
@@ -149,7 +150,8 @@ fun CalculatorScreen(
                 printers = printers,
                 selectedPrinterId = form.selectedPrinterId,
                 error = errors[CalculatorFormField.PRINTER],
-                onPrinterSelected = viewModel::onPrinterSelected
+                onPrinterSelected = viewModel::onPrinterSelected,
+                onManagePrinters = onManagePrinters
             )
 
             CalculatorTextField(
@@ -816,7 +818,8 @@ private fun PrinterSelector(
     printers: List<Printer>,
     selectedPrinterId: String?,
     error: String?,
-    onPrinterSelected: (Printer?) -> Unit
+    onPrinterSelected: (Printer?) -> Unit,
+    onManagePrinters: () -> Unit
 ) {
 
     var expanded by remember {
@@ -885,11 +888,17 @@ private fun PrinterSelector(
             }
         }
 
-        Text(
-            text = "Cadastro de impressoras em desenvolvimento.",
-            color = colors.onSurfaceVariant,
-            style = MaterialTheme.typography.bodySmall
-        )
+
+        TextButton(
+            onClick = onManagePrinters
+        ) {
+            Text(
+                text = "+ Cadastrar ou gerenciar impressoras",
+                color = colors.primary,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
+
 
         if (error != null) {
             Text(

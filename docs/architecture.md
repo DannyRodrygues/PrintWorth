@@ -689,17 +689,40 @@ A restauração integral após encerramento
 do processo Android ainda não está garantida
 e deverá ser tratada separadamente.
 
+
 ### 19.8 Impressoras
 
-A aplicação utiliza temporariamente uma
-impressora de demonstração para testar
-o fluxo de cálculo.
+O módulo de impressoras está implementado.
 
-A potência dessa impressora é ilustrativa
-e não representa uma medição real.
+O aplicativo possui:
 
-O cadastro e a persistência local serão
-implementados em uma próxima etapa.
+- Catálogo offline com 26 modelos FDM.
+- Seleção de modelos diretamente na calculadora.
+- Cadastro de impressoras pessoais.
+- Edição e exclusão de cadastros.
+- Persistência local com AndroidX DataStore.
+- Sincronização entre cadastros e calculadora.
+
+O domínio define o catálogo e o contrato
+PrinterRepository.
+
+O AndroidPrinterRepository implementa
+a persistência usando DataStore Preferences.
+
+O PrinterManagementViewModel controla as
+operações de gerenciamento.
+
+O CalculatorViewModel mantém a impressora
+selecionada sincronizada com os cadastros,
+preservando ajustes manuais de potência.
+
+A MainActivity fornece o repositório Android
+e o App.kt integra as telas.
+
+A documentação específica está disponível em:
+
+`docs/printers.md`
+
 
 ### 19.9 Testes e validação
 

@@ -337,4 +337,63 @@ class CalculatorFormValidatorTest {
         )
     }
 
+
+    @Test
+    fun catalogPrinterWithoutSuggestedPowerUsesEnteredPower() {
+        val catalogPrinter = Printer(
+            id = "creality-ender-3-v3-se",
+            name = "Creality Ender-3 V3 SE",
+            averagePowerWatts = 0
+        )
+
+        val state = validState().copy(
+            selectedPrinterId = catalogPrinter.id,
+            averagePowerWatts = "150"
+        )
+
+        val result = validator.validate(
+            state,
+            catalogPrinter
+        )
+
+        val success =
+            assertIs<CalculatorFormValidationResult.Success>(
+                result
+            )
+
+        assertEquals(
+            150,
+            success.input.printer.averagePowerWatts
+        )
+    }
+
+    @Test
+    fun catalogPrinterWithoutPowerRequiresUserInput() {
+        val catalogPrinter = Printer(
+            id = "creality-ender-3-v3-se",
+            name = "Creality Ender-3 V3 SE",
+            averagePowerWatts = 0
+        )
+
+        val state = validState().copy(
+            selectedPrinterId = catalogPrinter.id,
+            averagePowerWatts = ""
+        )
+
+        val result = validator.validate(
+            state,
+            catalogPrinter
+        )
+
+        val failure =
+            assertIs<CalculatorFormValidationResult.Failure>(
+                result
+            )
+
+        assertNotNull(
+            failure.errors[CalculatorFormField.AVERAGE_POWER]
+        )
+    }
+
+
 }

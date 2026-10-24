@@ -31,10 +31,15 @@ kotlin {
     }
     
     sourceSets {
+
         androidMain.dependencies {
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.compose.uiTooling)
+
+            // Persistência local das impressoras no Android.
+            implementation(libs.androidx.datastore.preferences)
         }
+
         commonMain.dependencies {
             implementation(libs.compose.runtime)
             implementation(libs.compose.foundation)

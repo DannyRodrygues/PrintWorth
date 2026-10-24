@@ -93,16 +93,17 @@ class CalculatorFormValidator {
                 "O tempo de impressão deve ser maior que zero."
         }
 
+
         if (
             selectedPrinter == null ||
             state.selectedPrinterId != selectedPrinter.id ||
             selectedPrinter.id.isBlank() ||
-            selectedPrinter.name.isBlank() ||
-            selectedPrinter.averagePowerWatts <= 0
+            selectedPrinter.name.isBlank()
         ) {
             errors[CalculatorFormField.PRINTER] =
                 "Selecione uma impressora válida."
         }
+
 
         val power = parseNumber(
             state.averagePowerWatts,
@@ -195,7 +196,11 @@ class CalculatorFormValidator {
                 printHours = requireNotNull(hours).toInt(),
                 printMinutes = requireNotNull(minutes).toInt(),
 
-                printer = requireNotNull(selectedPrinter),
+
+                printer = requireNotNull(selectedPrinter).copy(
+                    averagePowerWatts = requireNotNull(power).toInt()
+                ),
+
                 averagePowerWatts = requireNotNull(power).toInt(),
 
                 electricityRatePerKwh = MoneyRate(

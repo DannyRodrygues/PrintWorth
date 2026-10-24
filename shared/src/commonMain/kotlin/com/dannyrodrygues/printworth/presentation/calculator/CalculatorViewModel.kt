@@ -26,6 +26,12 @@ class CalculatorViewModel : ViewModel() {
 
     private var selectedPrinter: Printer? = null
 
+    /**
+     * Indica se o usuário modificou manualmente
+     * a potência na calculadora.
+     */
+    private var isAveragePowerManuallyEdited = false
+
     // Dados preenchidos pelo usuário
     private val _formState = MutableStateFlow(
         CalculatorFormState()
@@ -118,14 +124,27 @@ class CalculatorViewModel : ViewModel() {
      * Preenche automaticamente sua potência média,
      * permitindo que o usuário a ajuste depois.
      */
+
+    /**
+     * Seleciona uma impressora e utiliza sua
+     * potência média como valor inicial.
+     *
+     * Uma nova seleção reinicia o controle
+     * de ajuste manual.
+     */
     fun onPrinterSelected(printer: Printer?) {
+
         selectedPrinter = printer
+        isAveragePowerManuallyEdited = false
 
         updateForm(CalculatorFormField.PRINTER) {
             it.copy(
                 selectedPrinterId = printer?.id,
-                averagePowerWatts =
-                    printer?.averagePowerWatts?.toString() ?: ""
+                averagePowerWatts = printer
+                    ?.averagePowerWatts
+                    ?.takeIf { watts -> watts > 0 }
+                    ?.toString()
+                    .orEmpty()
             )
         }
 
@@ -134,11 +153,23 @@ class CalculatorViewModel : ViewModel() {
         }
     }
 
+
+
+    /**
+     * Registra uma alteração manual da potência.
+     *
+     * Esse valor terá prioridade sobre alterações
+     * posteriores na potência cadastrada.
+     */
     fun onAveragePowerChanged(value: String) {
+
+        isAveragePowerManuallyEdited = true
+
         updateForm(CalculatorFormField.AVERAGE_POWER) {
             it.copy(averagePowerWatts = value)
         }
     }
+
 
     fun onElectricityRateChanged(value: String) {
         updateForm(CalculatorFormField.ELECTRICITY_RATE) {
@@ -202,6 +233,96 @@ class CalculatorViewModel : ViewModel() {
         }
     }
 
+
+    /**
+     * Sincroniza a impressora selecionada com
+     * os modelos disponíveis atualmente.
+     *
+     * Deve ser chamada somente quando o catálogo
+     * e as impressoras pessoais estiverem carregados.
+     *
+     * Regras:
+     * - Cadastro inalterado: não modifica o formulário.
+     * - Cadastro editado: atualiza os dados internos.
+     * - Potência editada manualmente: preserva o valor.
+     * - Cadastro excluído: limpa a seleção.
+     */
+
+    fun synchronizeSelectedPrinter(
+        availablePrinters: List<Printer>
+    ) {
+
+        val selectedId =
+            _formState.value.selectedPrinterId ?: return
+
+        val updatedPrinter = availablePrinters.firstOrNull {
+            it.id == selectedId
+        }
+
+        // A impressora foi removida.
+        if (updatedPrinter == null) {
+
+            selectedPrinter = null
+            isAveragePowerManuallyEdited = false
+
+            _formState.update {
+                it.copy(
+                    selectedPrinterId = null,
+                    averagePowerWatts = ""
+                )
+            }
+
+            _fieldErrors.update { errors ->
+                errors -
+                        CalculatorFormField.AVERAGE_POWER +
+                        (
+                                CalculatorFormField.PRINTER to
+                                        "A impressora selecionada não está mais " +
+                                        "disponível. Escolha outra impressora."
+                                )
+            }
+
+            _calculationResult.value = null
+            _generalError.value = null
+
+            return
+        }
+
+        // Nada mudou no cadastro.
+        if (selectedPrinter == updatedPrinter) {
+            return
+        }
+
+        // Atualiza os dados internos da impressora.
+        selectedPrinter = updatedPrinter
+
+        // Atualiza a potência somente se o usuário
+        // não tiver digitado um valor personalizado.
+        if (!isAveragePowerManuallyEdited) {
+
+            _formState.update {
+                it.copy(
+                    averagePowerWatts = updatedPrinter
+                        .averagePowerWatts
+                        .takeIf { watts -> watts > 0 }
+                        ?.toString()
+                        .orEmpty()
+                )
+            }
+        }
+
+        // Os dados da impressora mudaram.
+        // O resultado anterior precisa ser recalculado.
+        _calculationResult.value = null
+        _generalError.value = null
+
+        _fieldErrors.update { errors ->
+            errors -
+                    CalculatorFormField.PRINTER -
+                    CalculatorFormField.AVERAGE_POWER
+        }
+    }
+
     /**
      * Valida o formulário e calcula o preço da peça.
      *
@@ -257,11 +378,19 @@ class CalculatorViewModel : ViewModel() {
     /**
      * Limpa o formulário e todos os estados associados.
      */
+
+    /**
+     * Limpa o formulário e todos os estados.
+     */
     fun resetForm() {
+
         selectedPrinter = null
+        isAveragePowerManuallyEdited = false
+
         _formState.value = CalculatorFormState()
         _fieldErrors.value = emptyMap()
         _generalError.value = null
         _calculationResult.value = null
     }
+
 }

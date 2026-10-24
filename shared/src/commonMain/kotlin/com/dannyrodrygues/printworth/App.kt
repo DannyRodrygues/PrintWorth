@@ -38,7 +38,6 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -55,6 +54,16 @@ import org.jetbrains.compose.resources.painterResource
 import printworth.shared.generated.resources.Res
 import printworth.shared.generated.resources.printworth_icon
 
+import com.dannyrodrygues.printworth.domain.repository.PrinterRepository
+import com.dannyrodrygues.printworth.presentation.printer.PrinterManagementScreen
+import com.dannyrodrygues.printworth.presentation.printer.PrinterManagementViewModel
+
+import androidx.compose.runtime.remember
+import com.dannyrodrygues.printworth.domain.catalog.PrinterCatalog
+
+import androidx.compose.runtime.LaunchedEffect
+import kotlinx.coroutines.flow.Flow
+
 /**
  * Telas principais do aplicativo.
  */
@@ -62,6 +71,8 @@ private const val SCREEN_HOME = "home"
 private const val SCREEN_CALCULATOR = "calculator"
 private const val SCREEN_RESULT = "result"
 private const val SCREEN_ABOUT = "about"
+
+private const val SCREEN_PRINTERS = "printers"
 
 /**
  * Ponto de entrada da interface do PrintWorth.
@@ -72,8 +83,9 @@ private const val SCREEN_ABOUT = "about"
  * nas camadas de domínio e apresentação.
  */
 @Composable
-@Preview
-fun App() {
+fun App(
+    printerRepository: PrinterRepository
+) {
 
     var currentScreen by rememberSaveable {
         mutableStateOf(SCREEN_HOME)
@@ -256,6 +268,28 @@ fun App() {
                 )
             }
 
+
+            SCREEN_PRINTERS -> {
+
+                val printerManagementViewModel:
+                        PrinterManagementViewModel = viewModel(
+                    initializer = {
+                        PrinterManagementViewModel(
+                            repository = printerRepository
+                        )
+                    }
+                )
+
+                PrinterManagementScreen(
+                    viewModel = printerManagementViewModel,
+
+                    onBack = {
+                        currentScreen = SCREEN_CALCULATOR
+                    }
+                )
+            }
+
+
             else -> {
 
                 // ViewModel compartilhado entre
@@ -298,20 +332,63 @@ fun App() {
                      * Será substituída pelo cadastro local.
                      * 150 W é um valor ilustrativo.
                      */
-                    val demonstrationPrinters = listOf(
-                        Printer(
-                            id = "preview-printer",
-                            name = "Impressora demonstração (150 W)",
-                            averagePowerWatts = 150
-                        )
+
+// Modelos pré-cadastrados, disponíveis offline.
+                    val catalogPrinters = remember {
+                        PrinterCatalog.models.map { model ->
+                            Printer(
+                                id = model.id,
+                                name = model.displayName,
+
+                                // Zero representa apenas ausência de
+                                // estimativa nesta lista temporária.
+                                // O formulário exigirá uma potência
+                                // positiva antes de realizar o cálculo.
+                                averagePowerWatts =
+                                    model.suggestedAveragePowerWatts ?: 0
+                            )
+                        }
+                    }
+
+
+// Observa as impressoras pessoais salvas no DataStore.
+// Null significa que ainda não terminou o primeiro carregamento.
+                    val personalPrintersFlow: Flow<List<Printer>?> =
+                        remember(printerRepository) {
+                            printerRepository.observePrinters()
+                        }
+
+                    val personalPrinters by personalPrintersFlow.collectAsState(
+                        initial = null
                     )
+
+// Une os modelos do catálogo às impressoras pessoais.
+                    val availablePrinters =
+                        catalogPrinters + personalPrinters.orEmpty()
+
+// Sincroniza a seleção quando os cadastros mudam.
+                    LaunchedEffect(
+                        personalPrinters,
+                        catalogPrinters
+                    ) {
+                        if (personalPrinters != null) {
+                            calculatorViewModel.synchronizeSelectedPrinter(
+                                availablePrinters
+                            )
+                        }
+                    }
+
+
 
                     CalculatorScreen(
                         viewModel = calculatorViewModel,
-                        printers = demonstrationPrinters,
+                        printers = availablePrinters,
 
                         onBack = {
                             currentScreen = SCREEN_HOME
+                        },
+                        onManagePrinters = {
+                            currentScreen = SCREEN_PRINTERS
                         },
 
                         onCalculated = {
