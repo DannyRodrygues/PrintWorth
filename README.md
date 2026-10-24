@@ -42,7 +42,7 @@ O projeto está sendo desenvolvido como parte do meu **portfólio profissional e
 
 ## 🎬 Demonstração do aplicativo
 
-Conheça o PrintWorth em funcionamento!
+Conheça o **PrintWorth** em funcionamento!
 
 O vídeo apresenta as principais funcionalidades do
 aplicativo, incluindo o cadastro de impressoras 3D,
@@ -60,8 +60,11 @@ do preço de venda.
 6. **Resultado:** visualização do preço sugerido, lucro estimado e detalhamento dos custos.
 7. **Edição do cálculo:** retorno ao formulário preservando os dados preenchidos.
 
-[▶️ Assistir à demonstração do PrintWorth](https://github.com/user-attachments/assets/f6faaf6a-c479-4d76-9725-eab5ea603c1d)
--->
+
+### ▶️ Assista à demonstração
+
+[🎥 Assistir ao vídeo demonstrativo do PrintWorth](https://github.com/user-attachments/assets/f6faaf6a-c479-4d76-9725-eab5ea603c1d)
+
 
 ---
 

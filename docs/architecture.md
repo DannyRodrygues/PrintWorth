@@ -24,8 +24,9 @@ forem implementadas, evitando abstrações sem necessidade.
 As versões das dependências ficam centralizadas em:
 gradle/libs.versions.toml.
 
-A solução de persistência local será definida e documentada
-na implementação do cadastro de impressoras.
+A persistência local das impressoras pessoais
+utiliza AndroidX DataStore Preferences,
+com implementação específica para Android..
 
 ## 3. Módulos
 
@@ -474,6 +475,7 @@ a navegação e as telas da calculadora.
 ---
 
 
+
 ## 18. Estado atual da implementação
 
 **Revisão:** 23/10/2026
@@ -497,23 +499,40 @@ a navegação e as telas da calculadora.
 - [x] Seção educativa Sobre o PrintWorth.
 - [x] Ajuda contextual dos métodos financeiros.
 - [x] Contato da desenvolvedora por link mailto.
+- [x] Catálogo offline com 26 modelos de impressoras FDM.
+- [x] Seleção de impressoras diretamente na calculadora.
+- [x] Cadastro de impressoras personalizadas.
+- [x] Edição e exclusão de impressoras pessoais.
+- [x] Persistência local com AndroidX DataStore.
+- [x] Sincronização entre cadastro e calculadora.
+- [x] Atualização automática da potência cadastrada.
+- [x] Preservação de potência ajustada manualmente.
+- [x] Invalidação da seleção após exclusão.
+- [x] Testes de sincronização em dispositivo Android.
 
 ### Funcionalidades pendentes
 
-- [ ] Cadastro de impressoras personalizadas.
-- [ ] Persistência local das impressoras.
-- [ ] Substituição da impressora de demonstração.
 - [ ] Ampliação dos testes de limites numéricos.
+- [ ] Tratamento completo de falhas de persistência.
 - [ ] Estratégia de restauração após morte do processo.
 - [ ] Testes completos de acessibilidade.
 - [ ] Validação das novas telas no tema Light.
 - [ ] Revisão de navegação e experiência do usuário.
+- [ ] Verificação de desempenho.
 - [ ] Preparação da distribuição Android.
 
 O salvamento de cálculos permanece como
 funcionalidade futura a ser definida.
 
+As funcionalidades de gerenciamento de impressoras
+foram validadas manualmente em dispositivo Android.
+
+A documentação específica está disponível em:
+
+`docs/printers.md`
+
 ---
+
 
 ## 19. Evolução da arquitetura da aplicação
 
@@ -658,6 +677,7 @@ e conecta as telas principais:
 - Calculator
 - Result
 - About
+- Printers
 
 O formulário apresenta duas etapas internas:
 
@@ -690,38 +710,97 @@ do processo Android ainda não está garantida
 e deverá ser tratada separadamente.
 
 
+
 ### 19.8 Impressoras
 
-O módulo de impressoras está implementado.
+O módulo de gerenciamento de impressoras está
+implementado e integrado à calculadora.
 
-O aplicativo possui:
+### Catálogo de impressoras
 
-- Catálogo offline com 26 modelos FDM.
-- Seleção de modelos diretamente na calculadora.
-- Cadastro de impressoras pessoais.
-- Edição e exclusão de cadastros.
-- Persistência local com AndroidX DataStore.
-- Sincronização entre cadastros e calculadora.
+O aplicativo possui um catálogo offline contendo
+26 modelos de impressoras 3D FDM.
 
-O domínio define o catálogo e o contrato
-PrinterRepository.
+Os modelos podem ser selecionados diretamente
+na calculadora, sem necessidade de cadastro.
 
-O AndroidPrinterRepository implementa
-a persistência usando DataStore Preferences.
+O catálogo é definido em:
 
-O PrinterManagementViewModel controla as
-operações de gerenciamento.
+`domain/catalog/PrinterCatalog.kt`
+
+### Impressoras pessoais
+
+O usuário pode cadastrar, editar e excluir
+impressoras personalizadas.
+
+Cada cadastro possui:
+
+- Identificador único.
+- Nome da impressora.
+- Potência média estimada em watts.
+
+Os cadastros são armazenados localmente
+utilizando AndroidX DataStore Preferences.
+
+### Organização arquitetural
+
+**Domínio:**
+
+- Printer.kt
+- PrinterCatalog.kt
+- PrinterRepository.kt
+
+**Camada de dados Android:**
+
+- AndroidPrinterRepository.kt
+
+**Apresentação:**
+
+- PrinterManagementViewModel.kt
+- PrinterManagementScreen.kt
+- CalculatorViewModel.kt
+- CalculatorScreen.kt
+
+**Integração:**
+
+- MainActivity.kt
+- App.kt
+
+### Sincronização
 
 O CalculatorViewModel mantém a impressora
-selecionada sincronizada com os cadastros,
-preservando ajustes manuais de potência.
+selecionada sincronizada com os dados disponíveis.
 
-A MainActivity fornece o repositório Android
-e o App.kt integra as telas.
+Quando uma impressora pessoal é editada,
+a calculadora reconhece a alteração.
 
-A documentação específica está disponível em:
+Se a potência foi modificada manualmente
+durante o cálculo, o valor personalizado
+é preservado.
+
+Quando uma impressora selecionada é excluída,
+a seleção é invalidada, exigindo uma nova escolha.
+
+A sincronização evita cálculos com dados
+desatualizados e preserva os demais campos
+preenchidos pelo usuário.
+
+### Validação
+
+Os testes realizados em dispositivo Android
+confirmaram:
+
+- Atualização automática da potência.
+- Preservação de ajustes manuais.
+- Invalidação após exclusão.
+- Seleção de impressoras do catálogo.
+- Seleção de impressoras pessoais.
+
+A documentação completa está disponível em:
 
 `docs/printers.md`
+
+
 
 
 ### 19.9 Testes e validação
