@@ -4,6 +4,7 @@ package com.dannyrodrygues.printworth.presentation.about
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,12 +19,17 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,7 +37,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -39,16 +49,11 @@ import org.jetbrains.compose.resources.painterResource
 import printworth.shared.generated.resources.Res
 import printworth.shared.generated.resources.printworth_icon
 
-import androidx.compose.foundation.clickable
-import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.text.style.TextDecoration
-
 /**
  * Tela educativa e informativa do PrintWorth.
  *
- * Explica o funcionamento da calculadora,
- * os métodos de precificação e as limitações
- * dos resultados apresentados.
+ * Os assuntos são apresentados em formato acordeão.
+ * Apenas uma seção permanece expandida por vez.
  *
  * Não executa cálculos financeiros.
  */
@@ -61,6 +66,12 @@ fun AboutScreen(
     val colors = MaterialTheme.colorScheme
     val uriHandler = LocalUriHandler.current
 
+    // Guarda qual assunto está aberto.
+    // Null indica que todos estão recolhidos.
+    var expandedSection by rememberSaveable {
+        mutableStateOf<String?>(null)
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -71,10 +82,10 @@ fun AboutScreen(
                 horizontal = 16.dp,
                 vertical = 12.dp
             ),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
 
-        // Cabeçalho oficial do PrintWorth
+        // Cabeçalho oficial do PrintWorth.
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -92,7 +103,8 @@ fun AboutScreen(
                     vertical = 16.dp
                 ),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement =
+                Arrangement.spacedBy(12.dp)
         ) {
 
             Image(
@@ -112,6 +124,10 @@ fun AboutScreen(
             )
         }
 
+        Spacer(
+            modifier = Modifier.height(4.dp)
+        )
+
         Text(
             text = "Sobre o PrintWorth",
             style = MaterialTheme.typography.headlineMedium,
@@ -126,8 +142,22 @@ fun AboutScreen(
             color = colors.onSurfaceVariant
         )
 
+        Text(
+            text = "Selecione um assunto abaixo " +
+                    "para conhecer os detalhes.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = colors.onSurfaceVariant
+        )
+
+        // 1. Funcionamento geral.
         AboutSection(
-            title = "Como funciona a calculadora?"
+            title = "Como funciona a calculadora?",
+            expanded = expandedSection == "calculator",
+            onToggle = {
+                expandedSection = if (
+                    expandedSection == "calculator"
+                ) null else "calculator"
+            }
         ) {
 
             Text(
@@ -149,8 +179,15 @@ fun AboutScreen(
             )
         }
 
+        // 2. Lucro sobre o custo.
         AboutSection(
-            title = "Lucro sobre o custo"
+            title = "Lucro sobre o custo",
+            expanded = expandedSection == "markup",
+            onToggle = {
+                expandedSection = if (
+                    expandedSection == "markup"
+                ) null else "markup"
+            }
         ) {
 
             Text(
@@ -183,8 +220,15 @@ fun AboutScreen(
             )
         }
 
+        // 3. Margem sobre a venda.
         AboutSection(
-            title = "Margem sobre a venda"
+            title = "Margem sobre a venda",
+            expanded = expandedSection == "margin",
+            onToggle = {
+                expandedSection = if (
+                    expandedSection == "margin"
+                ) null else "margin"
+            }
         ) {
 
             Text(
@@ -223,8 +267,15 @@ fun AboutScreen(
             )
         }
 
+        // 4. Comparação de métodos.
         AboutSection(
-            title = "Qual é a diferença?"
+            title = "Qual é a diferença?",
+            expanded = expandedSection == "difference",
+            onToggle = {
+                expandedSection = if (
+                    expandedSection == "difference"
+                ) null else "difference"
+            }
         ) {
 
             Text(
@@ -245,8 +296,15 @@ fun AboutScreen(
             )
         }
 
+        // 5. Comissão do ponto de venda.
         AboutSection(
-            title = "Comissão do ponto de venda"
+            title = "Comissão do ponto de venda",
+            expanded = expandedSection == "commission",
+            onToggle = {
+                expandedSection = if (
+                    expandedSection == "commission"
+                ) null else "commission"
+            }
         ) {
 
             Text(
@@ -270,8 +328,15 @@ fun AboutScreen(
             )
         }
 
+        // 6. Limitações.
         AboutSection(
-            title = "O que o cálculo não inclui?"
+            title = "O que o cálculo não inclui?",
+            expanded = expandedSection == "limitations",
+            onToggle = {
+                expandedSection = if (
+                    expandedSection == "limitations"
+                ) null else "limitations"
+            }
         ) {
 
             Text(
@@ -294,8 +359,15 @@ fun AboutScreen(
             )
         }
 
+        // 7. Informações do projeto.
         AboutSection(
-            title = "Sobre o projeto"
+            title = "Sobre o projeto",
+            expanded = expandedSection == "project",
+            onToggle = {
+                expandedSection = if (
+                    expandedSection == "project"
+                ) null else "project"
+            }
         ) {
 
             Text(
@@ -314,7 +386,6 @@ fun AboutScreen(
             Text(
                 text = "Desenvolvedora: Dani Rodrigues.",
                 fontWeight = FontWeight.Medium
-
             )
 
             Text(
@@ -329,6 +400,10 @@ fun AboutScreen(
             )
         }
 
+        Spacer(
+            modifier = Modifier.height(4.dp)
+        )
+
         OutlinedButton(
             onClick = onBack,
             modifier = Modifier.fillMaxWidth(),
@@ -337,9 +412,7 @@ fun AboutScreen(
 
             Text(
                 text = "Voltar",
-                modifier = Modifier.padding(
-                    vertical = 8.dp
-                ),
+                modifier = Modifier.padding(vertical = 8.dp),
                 fontWeight = FontWeight.SemiBold
             )
         }
@@ -351,11 +424,16 @@ fun AboutScreen(
 }
 
 /**
- * Cartão reutilizado pelas seções educativas.
+ * Seção expansível reutilizável.
+ *
+ * Quando fechada, exibe somente o título.
+ * Quando aberta, apresenta o conteúdo educativo.
  */
 @Composable
 private fun AboutSection(
     title: String,
+    expanded: Boolean,
+    onToggle: () -> Unit,
     content: @Composable () -> Unit
 ) {
 
@@ -364,29 +442,80 @@ private fun AboutSection(
     Surface(
         modifier = Modifier.fillMaxWidth(),
         color = colors.surface,
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(14.dp),
         border = BorderStroke(
             width = 1.dp,
-            color = colors.outline.copy(alpha = 0.25f)
+            color = if (expanded) {
+                colors.primary.copy(alpha = 0.55f)
+            } else {
+                colors.outline.copy(alpha = 0.25f)
+            }
         )
     ) {
 
-        Column(
-            modifier = Modifier.padding(18.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
+        Column {
 
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = colors.onSurface
-            )
-
-            Column(
-                verticalArrangement = Arrangement.spacedBy(10.dp)
+            // Área clicável do sumário.
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .semantics {
+                        stateDescription = if (expanded) {
+                            "Expandido"
+                        } else {
+                            "Recolhido"
+                        }
+                    }
+                    .clickable(onClick = onToggle)
+                    .padding(
+                        horizontal = 16.dp,
+                        vertical = 18.dp
+                    ),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                content()
+
+                Text(
+                    text = title,
+                    modifier = Modifier.weight(1f),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = colors.onSurface
+                )
+
+                // Indicador de expandir/recolher.
+                Text(
+                    text = if (expanded) "−" else "+",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = colors.primary
+                )
+            }
+
+            // O conteúdo só aparece quando
+            // o assunto está selecionado.
+            if (expanded) {
+
+                HorizontalDivider(
+                    modifier = Modifier.padding(
+                        horizontal = 16.dp
+                    ),
+                    color = colors.outline.copy(alpha = 0.2f)
+                )
+
+                Column(
+                    modifier = Modifier.padding(
+                        start = 16.dp,
+                        end = 16.dp,
+                        top = 14.dp,
+                        bottom = 18.dp
+                    ),
+                    verticalArrangement =
+                        Arrangement.spacedBy(10.dp)
+                ) {
+
+                    content()
+                }
             }
         }
     }
