@@ -1,4 +1,5 @@
 
+
 <div align="center">
 
 ![Banner oficial PrintWorth](assets/branding/printworth-banner.png)
@@ -62,18 +63,9 @@ URL_GERADA_PELO_GITHUB
 6. **Resultado:** visualização do preço sugerido, lucro estimado e detalhamento dos custos.
 7. **Edição do cálculo:** retorno ao formulário preservando os dados preenchidos.
 
-> 🎥 **Vídeo demonstrativo em preparação.**
->
-> O vídeo será disponibilizado nesta seção após a gravação da demonstração do aplicativo.
 
-<!--
-Quando o vídeo estiver pronto, substituir o aviso
-acima pelo link ou pela mídia hospedada no GitHub
-ou em outra plataforma de vídeo.
 
-Exemplo de link Markdown:
-
-[▶️ Assistir à demonstração do PrintWorth](URL_DO_VIDEO)
+[▶️ Assistir à demonstração do PrintWorth](https://github.com/user-attachments/assets/f6faaf6a-c479-4d76-9725-eab5ea603c1d)
 -->
 
 ---
