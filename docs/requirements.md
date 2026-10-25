@@ -52,14 +52,15 @@ O histórico de cálculos será avaliado em uma etapa posterior.
 | Campo | Unidade | Regra |
 |---|---|---|
 | Nome da peça | Texto | Opcional |
+| Moeda do cálculo | BRL, USD ou EUR | Seleção, padrão BRL |
 | Peso do filamento consumido | g | Obrigatório, maior que zero |
-| Preço do filamento | R$/kg | Obrigatório, maior ou igual a zero |
+| Preço do filamento | Moeda selecionada/kg | Obrigatório, maior ou igual a zero |
 | Tempo de impressão | Horas e minutos | Obrigatório, total maior que zero |
 | Impressora | Seleção | Obrigatória |
 | Potência média utilizada | W | Obrigatória, maior que zero |
-| Tarifa de energia | R$/kWh | Obrigatória, maior ou igual a zero |
-| Desgaste da impressora | R$/h | Obrigatório, maior ou igual a zero |
-| Embalagem | R$ | Opcional, padrão zero |
+| Tarifa de energia | Moeda selecionada/kWh | Obrigatória, maior ou igual a zero |
+| Desgaste da impressora | Moeda selecionada/h | Obrigatório, maior ou igual a zero |
+| Embalagem | Moeda selecionada | Opcional, padrão zero |
 | Método de precificação | Seleção | Sobre o custo (padrão) ou Sobre a venda |
 | Percentual desejado | % | Obrigatório, maior ou igual a zero; sujeito às regras do método |
 | Aplicar comissão do ponto | Sim/Não | Padrão não |
@@ -301,3 +302,175 @@ Funcionalidades ainda previstas:
 O salvamento de cálculos permanece como
 funcionalidade futura, sujeito à definição
 de escopo e persistência.
+
+
+---
+
+## 14. Suporte a múltiplas moedas
+
+**Status:** Implementado e validado no Android.
+
+O PrintWorth permite calcular custos de produção,
+preços de venda e lucro estimado utilizando
+três moedas.
+
+### 14.1 Moedas disponíveis
+
+| Código | Moeda | Símbolo |
+|---|---|---|
+| BRL | Real brasileiro | R$ |
+| USD | Dólar americano | US$ |
+| EUR | Euro | € |
+
+A moeda padrão do aplicativo é o Real brasileiro (BRL).
+
+O usuário pode selecionar a moeda na primeira
+etapa da calculadora, denominada Impressão.
+
+### 14.2 Regra principal
+
+Todos os valores monetários devem ser informados
+diretamente na moeda selecionada pelo usuário.
+
+O PrintWorth não realiza conversão cambial.
+
+Não são utilizadas taxas de câmbio ou consultas
+externas para executar os cálculos.
+
+Exemplo:
+
+Se o usuário selecionar EUR e informar
+€ 10,00 como preço do filamento por quilograma,
+o aplicativo utilizará esse valor diretamente
+em euros.
+
+Para um consumo de 100 gramas:
+
+Custo do filamento = € 1,00.
+
+O custo total, o preço sugerido, a comissão
+e o lucro estimado também serão apresentados
+em euros.
+
+### 14.3 Campos afetados pela moeda
+
+A moeda selecionada deve ser utilizada em:
+
+- Preço do filamento por quilograma.
+- Tarifa de energia por kWh.
+- Desgaste da impressora por hora.
+- Custo de embalagem.
+- Custo total de produção.
+- Preço de venda sugerido.
+- Comissão calculada.
+- Lucro estimado.
+- Detalhamento dos custos.
+
+Peso, tempo, potência elétrica e percentuais
+não dependem da moeda selecionada.
+
+### 14.4 Alteração da moeda
+
+O usuário pode alterar a moeda durante
+o preenchimento da calculadora.
+
+Quando existem valores monetários preenchidos,
+o aplicativo solicita confirmação antes
+de realizar a alteração.
+
+Após a confirmação:
+
+- A nova moeda é selecionada.
+- Os valores monetários anteriores são limpos.
+- O nome da peça é preservado.
+- A impressora selecionada é preservada.
+- O peso do filamento é preservado.
+- O tempo de impressão é preservado.
+- A potência média é preservada.
+- Os percentuais de lucro e comissão são preservados.
+- O método de precificação é preservado.
+- Um resultado anterior é invalidado.
+
+Se o usuário cancelar a alteração,
+a moeda e os dados preenchidos permanecem
+inalterados.
+
+Essa proteção evita misturar valores
+de moedas diferentes no mesmo cálculo.
+
+### 14.5 Formatação monetária
+
+Os valores financeiros são apresentados
+conforme a moeda selecionada.
+
+Exemplos:
+
+| Moeda | Valor apresentado |
+|---|---|
+| BRL | R$ 1.234,56 |
+| USD | US$ 1,234.56 |
+| EUR | € 1.234,56 |
+
+Os valores apresentados são exemplos
+de formatação, não de conversão cambial.
+
+Os valores financeiros continuam sendo
+calculados com aritmética de precisão fixa,
+sem utilização de Float ou Double
+para representar dinheiro.
+
+### 14.6 Métodos de precificação
+
+Os dois métodos existentes continuam disponíveis:
+
+- Lucro sobre o custo (COST_MARKUP).
+- Margem sobre a venda (SALE_MARGIN).
+
+As fórmulas, as validações de percentuais
+e a aplicação da comissão não são alteradas
+pela escolha da moeda.
+
+O resultado é apresentado na mesma moeda
+utilizada nos custos informados.
+
+### 14.7 Funcionamento offline
+
+A seleção da moeda e os cálculos financeiros
+não exigem conexão com a internet.
+
+O aplicativo não depende de serviços
+de cotação cambial.
+
+### 14.8 Seção educativa
+
+A tela Sobre o PrintWorth possui um assunto
+expansível denominado "Moedas disponíveis".
+
+Essa seção explica:
+
+- As três moedas suportadas.
+- A necessidade de informar os custos
+  na moeda escolhida.
+- A ausência de conversão cambial.
+- O comportamento da troca de moeda.
+
+### 14.9 Validação
+
+A funcionalidade foi testada manualmente
+em dispositivo Android.
+
+Cenários validados:
+
+- [x] Seleção do Real brasileiro (BRL).
+- [x] Seleção do Dólar americano (USD).
+- [x] Seleção do Euro (EUR).
+- [x] Atualização dos símbolos nos campos.
+- [x] Exibição dos resultados na moeda selecionada.
+- [x] Cálculo correto em euros.
+- [x] Cálculos conferidos nas três moedas.
+- [x] Limpeza dos valores monetários ao trocar a moeda.
+- [x] Funcionamento da seleção na calculadora.
+
+A ampliação da cobertura de testes automatizados
+e de cenários extremos permanece prevista
+para a fase de qualidade.

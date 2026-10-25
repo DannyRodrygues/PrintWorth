@@ -832,5 +832,285 @@ Foram verificados:
 - Abertura do link de contato.
 - Ajuda contextual da precificação.
 
-A validação completa das telas no tema Light
-e os testes de acessibilidade permanecem pendentes.
+
+Os temas Light e Dark foram validados em
+dispositivo Android físico.
+
+A interface também passou por verificações
+manuais de usabilidade e legibilidade.
+
+A cobertura completa de acessibilidade
+deve ser documentada conforme os recursos
+e cenários efetivamente testados.
+
+
+---
+
+## 20. Suporte a múltiplas moedas
+
+**Status:** Implementado e validado no Android.
+
+### 20.1 Objetivo
+
+Permitir que o usuário realize cálculos financeiros
+utilizando uma das três moedas disponíveis:
+
+- BRL — Real brasileiro (R$).
+- USD — Dólar americano (US$).
+- EUR — Euro (€).
+
+Todos os custos são informados diretamente
+na moeda selecionada.
+
+O PrintWorth não realiza conversão cambial
+e não depende de serviços de cotação.
+
+### 20.2 Modelo de domínio
+
+Arquivo:
+
+`domain/model/CalculationCurrency.kt`
+
+A enumeração CalculationCurrency representa
+as moedas disponíveis.
+
+Cada moeda possui:
+
+- Código identificador.
+- Nome para exibição.
+- Símbolo monetário.
+- Separador decimal.
+- Separador de milhares.
+
+A moeda padrão é BRL.
+
+Os cálculos financeiros continuam utilizando
+os modelos Money e MoneyRate.
+
+A representação monetária mantém a estratégia
+de precisão fixa com valores inteiros.
+
+Não são utilizados Float ou Double para
+representar dinheiro.
+
+### 20.3 Estado do formulário
+
+Arquivo:
+
+`presentation/calculator/CalculatorFormState.kt`
+
+O estado do formulário possui a propriedade:
+
+`currency: CalculationCurrency`
+
+Essa propriedade identifica a moeda utilizada
+durante o preenchimento e o cálculo.
+
+O estado inicial utiliza:
+
+`CalculationCurrency.BRL`
+
+A moeda faz parte do estado observável
+gerenciado pelo CalculatorViewModel.
+
+### 20.4 Gerenciamento da moeda
+
+Arquivo:
+
+`presentation/calculator/CalculatorViewModel.kt`
+
+O ViewModel possui as funções:
+
+- hasEnteredMonetaryValues()
+- onCurrencyChanged()
+
+A primeira identifica se já existem
+valores monetários preenchidos.
+
+A segunda altera a moeda selecionada,
+sem realizar conversão cambial.
+
+Quando a moeda é alterada, são limpos:
+
+- Preço do filamento.
+- Tarifa de energia elétrica.
+- Desgaste da impressora.
+- Custo de embalagem.
+
+São preservados:
+
+- Nome da peça.
+- Impressora selecionada.
+- Peso do filamento.
+- Tempo de impressão.
+- Potência média.
+- Método de precificação.
+- Percentual de lucro ou margem.
+- Configurações de comissão.
+
+Um resultado anterior é invalidado
+quando a moeda é alterada.
+
+### 20.5 Interface da calculadora
+
+Arquivo:
+
+`presentation/calculator/CalculatorScreen.kt`
+
+A etapa Impressão apresenta o seletor
+da moeda do cálculo.
+
+As opções disponíveis são:
+
+- Real brasileiro (BRL).
+- Dólar americano (USD).
+- Euro (EUR).
+
+A interface utiliza o símbolo da moeda
+selecionada nos campos monetários.
+
+Exemplos:
+
+- R$/kg, US$/kg ou €/kg.
+- R$/kWh, US$/kWh ou €/kWh.
+- R$/h, US$/h ou €/h.
+
+Se já existirem valores monetários preenchidos,
+a interface apresenta um diálogo de confirmação
+antes de alterar a moeda.
+
+O usuário pode confirmar a troca e a limpeza
+dos custos ou cancelar a operação.
+
+A ajuda contextual de precificação também
+apresenta exemplos na moeda selecionada.
+
+### 20.6 Formatação monetária
+
+Arquivo:
+
+`presentation/format/MoneyFormatter.kt`
+
+O MoneyFormatter é responsável por apresentar
+os valores financeiros na moeda correta.
+
+Recebe:
+
+- Valor monetário em centavos.
+- Moeda selecionada.
+
+Retorna o valor formatado para exibição.
+
+Exemplos:
+
+| Moeda | Formatação |
+|---|---|
+| BRL | R$ 1.234,56 |
+| USD | US$ 1,234.56 |
+| EUR | € 1.234,56 |
+
+A formatação não modifica o valor numérico
+e não realiza conversão cambial.
+
+O cálculo financeiro permanece independente
+da formatação visual.
+
+### 20.7 Integração com o resultado
+
+Arquivos:
+
+- App.kt
+- ResultScreen.kt
+
+O App.kt obtém a moeda selecionada
+a partir do estado do CalculatorViewModel.
+
+Essa moeda é fornecida à ResultScreen
+junto ao resultado financeiro calculado.
+
+A ResultScreen utiliza MoneyFormatter
+para exibir:
+
+- Preço de venda sugerido.
+- Lucro estimado.
+- Custo do filamento.
+- Custo de energia.
+- Desgaste da impressora.
+- Embalagem.
+- Custo base.
+- Comissão do ponto de venda.
+
+Todos os valores são apresentados
+na moeda selecionada.
+
+A ResultScreen não realiza cálculos
+financeiros nem conversões de moeda.
+
+### 20.8 Regras de negócio
+
+A seleção da moeda não altera as fórmulas
+financeiras existentes.
+
+Continuam disponíveis:
+
+- Lucro sobre o custo (COST_MARKUP).
+- Margem sobre a venda (SALE_MARGIN).
+- Comissão opcional.
+
+Os valores monetários de um cálculo devem
+pertencer à mesma moeda.
+
+A troca de moeda reinicia os campos financeiros
+para evitar misturar unidades monetárias.
+
+### 20.9 Funcionamento offline
+
+O suporte a múltiplas moedas funciona
+integralmente sem conexão com a internet.
+
+Não são utilizadas APIs de câmbio.
+
+O aplicativo não consulta taxas de conversão.
+
+### 20.10 Testes e validação
+
+Teste automatizado:
+
+`presentation/format/MoneyFormatterTest.kt`
+
+O teste verifica a formatação monetária
+das três moedas suportadas.
+
+Comando de validação:
+
+`./gradlew :shared:testAndroidHostTest`
+
+Resultado informado durante o desenvolvimento:
+
+BUILD SUCCESSFUL.
+
+Os testes manuais realizados em dispositivo
+Android confirmaram:
+
+- [x] Seleção de BRL.
+- [x] Seleção de USD.
+- [x] Seleção de EUR.
+- [x] Atualização dos símbolos monetários.
+- [x] Resultados exibidos na moeda selecionada.
+- [x] Aplicação correta da margem de lucro.
+- [x] Detalhamento financeiro na mesma moeda.
+- [x] Limpeza dos custos após troca de moeda.
+- [x] Funcionamento sem conversão cambial.
+
+A ampliação dos testes automatizados
+de integração permanece como melhoria futura.
+
+### 20.11 Documentação relacionada
+
+As regras funcionais estão registradas em:
+
+`docs/requirements.md`
+
+As fórmulas financeiras estão documentadas em:
+
+`docs/calculation-rules.md`

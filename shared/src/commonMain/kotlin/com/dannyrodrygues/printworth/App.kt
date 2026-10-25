@@ -302,27 +302,34 @@ fun App(
                     .collectAsState()
                     .value
 
+
+                val calculationCurrency = calculatorViewModel
+                    .formState
+                    .collectAsState()
+                    .value
+                    .currency
+
+
                 if (
                     currentScreen == SCREEN_RESULT &&
                     result != null
                 ) {
 
+
                     ResultScreen(
                         result = result,
+                        currency = calculationCurrency,
 
                         onEdit = {
-                            // Mantém os dados preenchidos.
-                            currentScreen =
-                                SCREEN_CALCULATOR
+                            currentScreen = SCREEN_CALCULATOR
                         },
 
                         onNewCalculation = {
                             calculatorViewModel.resetForm()
-
-                            currentScreen =
-                                SCREEN_CALCULATOR
+                            currentScreen = SCREEN_CALCULATOR
                         }
                     )
+
 
                 } else {
 

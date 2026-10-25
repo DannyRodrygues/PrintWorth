@@ -1,23 +1,25 @@
 
 package com.dannyrodrygues.printworth.presentation.calculator
 
+import com.dannyrodrygues.printworth.domain.model.CalculationCurrency
 import com.dannyrodrygues.printworth.domain.model.PricingMethod
 
 /**
  * Representa os valores digitados no formulário.
  *
- * Os campos numéricos permanecem como String
- * para permitir entradas brasileiras com vírgula.
+ * Os campos numéricos permanecem como String.
+ * Aceita vírgula ou ponto como separador decimal.
  *
- * A conversão para os modelos de domínio será
- * realizada após a validação das entradas.
- *
- * Esta classe não contém regras de cálculo.
+ * Esta classe não executa cálculos financeiros.
  */
 data class CalculatorFormState(
 
     // Identificação da peça
     val pieceName: String = "",
+
+    // Moeda selecionada para o cálculo
+    val currency: CalculationCurrency =
+        CalculationCurrency.BRL,
 
     // Filamento
     val filamentWeightGrams: String = "",
@@ -43,6 +45,7 @@ data class CalculatorFormState(
     val commissionEnabled: Boolean = false,
     val commissionPercent: String = "",
 
-    // Método de precificação escolhido.
-    val pricingMethod: PricingMethod = PricingMethod.COST_MARKUP
+    // Método de formação do preço
+    val pricingMethod: PricingMethod =
+        PricingMethod.COST_MARKUP
 )

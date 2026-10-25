@@ -68,6 +68,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 
+import com.dannyrodrygues.printworth.domain.model.CalculationCurrency
+import com.dannyrodrygues.printworth.presentation.format.MoneyFormatter
+
 /**
  * Formulário dividido em duas etapas:
  *
@@ -95,6 +98,16 @@ fun CalculatorScreen(
     var showPricingHelp by rememberSaveable {
         mutableStateOf(false)
     }
+
+
+    var currencyMenuExpanded by remember {
+        mutableStateOf(false)
+    }
+
+    var pendingCurrency by rememberSaveable {
+        mutableStateOf<CalculationCurrency?>(null)
+    }
+
 
     val form by viewModel.formState.collectAsState()
     val errors by viewModel.fieldErrors.collectAsState()
@@ -139,6 +152,88 @@ fun CalculatorScreen(
                 )
             }
 
+
+// Seleção da moeda utilizada em todo o cálculo.
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+
+                Text(
+                    text = "Moeda do cálculo",
+                    fontWeight = FontWeight.SemiBold,
+                    color = colors.onBackground
+                )
+
+                Box(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+
+                    OutlinedButton(
+                        onClick = {
+                            currencyMenuExpanded = true
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp),
+                        shape = RoundedCornerShape(10.dp)
+                    ) {
+
+                        Text(
+                            text = form.currency.displayName,
+                            modifier = Modifier.weight(1f)
+                        )
+
+                        Text("▾")
+                    }
+
+                    DropdownMenu(
+                        expanded = currencyMenuExpanded,
+                        onDismissRequest = {
+                            currencyMenuExpanded = false
+                        }
+                    ) {
+
+                        CalculationCurrency.entries.forEach { currency ->
+
+                            DropdownMenuItem(
+                                text = {
+                                    Text(currency.displayName)
+                                },
+                                onClick = {
+
+                                    currencyMenuExpanded = false
+
+                                    if (currency != form.currency) {
+
+                                        if (
+                                            viewModel.hasEnteredMonetaryValues()
+                                        ) {
+                                            // Solicita confirmação antes
+                                            // de limpar os custos existentes.
+                                            pendingCurrency = currency
+                                        } else {
+                                            // Ainda não existem custos
+                                            // informados.
+                                            viewModel.onCurrencyChanged(
+                                                currency
+                                            )
+                                        }
+                                    }
+                                }
+                            )
+                        }
+                    }
+                }
+
+                Text(
+                    text = "Informe todos os custos na moeda " +
+                            "selecionada. Não há conversão cambial.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = colors.onSurfaceVariant
+                )
+            }
+
+
             CalculatorTextField(
                 title = "Nome da peça",
                 value = form.pieceName,
@@ -167,7 +262,7 @@ fun CalculatorScreen(
                 title = "Preço do filamento",
                 value = form.filamentPricePerKg,
                 onValueChange = viewModel::onFilamentPriceChanged,
-                unit = "R$/kg",
+                unit = "${form.currency.symbol}/kg",
                 error = errors[CalculatorFormField.FILAMENT_PRICE]
             )
 
@@ -274,7 +369,7 @@ fun CalculatorScreen(
                 value = form.electricityRatePerKwh,
                 onValueChange =
                     viewModel::onElectricityRateChanged,
-                unit = "R$/kWh",
+                unit = "${form.currency.symbol}/kWh",
                 error = errors[CalculatorFormField.ELECTRICITY_RATE]
             )
 
@@ -282,7 +377,7 @@ fun CalculatorScreen(
                 title = "Desgaste da impressora",
                 value = form.printerWearPerHour,
                 onValueChange = viewModel::onPrinterWearChanged,
-                unit = "R$/h",
+                unit = "${form.currency.symbol}/h",
                 error = errors[CalculatorFormField.PRINTER_WEAR]
             )
 
@@ -290,7 +385,7 @@ fun CalculatorScreen(
                 title = "Embalagem (opcional)",
                 value = form.packagingCost,
                 onValueChange = viewModel::onPackagingCostChanged,
-                unit = "R$",
+                unit = form.currency.symbol,
                 error = errors[CalculatorFormField.PACKAGING]
             )
 
@@ -347,28 +442,36 @@ fun CalculatorScreen(
                                 fontWeight = FontWeight.Bold
                             )
 
+
                             Text(
                                 text = "Acrescenta o percentual desejado " +
                                         "ao custo de produção.\n\n" +
-                                        "Exemplo: uma peça custa R$ 20,00. " +
+                                        "Exemplo: uma peça custa " +
+                                        "${MoneyFormatter.format(2000L, form.currency)}. " +
                                         "Com 100% sobre o custo, o preço " +
-                                        "será R$ 40,00, sem comissão."
+                                        "será ${MoneyFormatter.format(4000L, form.currency)}, " +
+                                        "sem comissão."
                             )
+
 
                             Text(
                                 text = "Sobre a venda",
                                 fontWeight = FontWeight.Bold
                             )
 
+
                             Text(
                                 text = "Define quanto do preço final " +
                                         "deve sobrar após descontar " +
                                         "os custos e a comissão.\n\n" +
-                                        "Exemplo: uma peça custa R$ 20,00. " +
+                                        "Exemplo: uma peça custa " +
+                                        "${MoneyFormatter.format(2000L, form.currency)}. " +
                                         "Para obter margem de 50%, " +
-                                        "o preço será R$ 40,00, " +
+                                        "o preço será " +
+                                        "${MoneyFormatter.format(4000L, form.currency)}, " +
                                         "sem comissão."
                             )
+
 
                             Text(
                                 text = "Importante: no método Sobre " +
@@ -545,9 +648,62 @@ fun CalculatorScreen(
             }
         }
 
+
         Spacer(Modifier.height(8.dp))
     }
+
+    // Confirmação para evitar misturar moedas.
+    pendingCurrency?.let { newCurrency ->
+
+        AlertDialog(
+            onDismissRequest = {
+                pendingCurrency = null
+            },
+
+            title = {
+                Text("Alterar moeda do cálculo?")
+            },
+
+            text = {
+                Text(
+                    "Você está utilizando " +
+                            "${form.currency.displayName}.\n\n" +
+                            "Ao mudar para ${newCurrency.displayName}, " +
+                            "os valores monetários já preenchidos " +
+                            "serão apagados.\n\n" +
+                            "A impressora, o peso, o tempo e " +
+                            "os percentuais serão preservados.\n\n" +
+                            "Nenhuma conversão cambial será realizada."
+                )
+            },
+
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.onCurrencyChanged(
+                            newCurrency
+                        )
+
+                        pendingCurrency = null
+                    }
+                ) {
+                    Text("Trocar e limpar custos")
+                }
+            },
+
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        pendingCurrency = null
+                    }
+                ) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
 }
+
 
 /**
  * Cabeçalho visual da calculadora.

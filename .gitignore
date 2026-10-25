@@ -24,3 +24,5 @@ node_modules/
 # Android signing keys
 *.jks
 *.keystore
+# Arquivos locais de distribuição do Android
+/androidApp/release/

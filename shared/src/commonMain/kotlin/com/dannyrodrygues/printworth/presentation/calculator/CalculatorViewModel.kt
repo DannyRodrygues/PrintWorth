@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import com.dannyrodrygues.printworth.domain.model.PricingMethod
-
+import com.dannyrodrygues.printworth.domain.model.CalculationCurrency
 /**
  * ViewModel responsável pelo estado e pelas ações
  * do formulário da calculadora PrintWorth.
@@ -322,6 +322,78 @@ class CalculatorViewModel : ViewModel() {
                     CalculatorFormField.AVERAGE_POWER
         }
     }
+
+
+    /**
+     * Verifica se já existem valores monetários
+     * informados no formulário.
+     *
+     * Utilizado pela interface para solicitar
+     * confirmação antes da troca de moeda.
+     */
+    fun hasEnteredMonetaryValues(): Boolean {
+
+        val state = _formState.value
+
+        return state.filamentPricePerKg.isNotBlank() ||
+                state.electricityRatePerKwh.isNotBlank() ||
+                state.printerWearPerHour.isNotBlank() ||
+                state.packagingCost.trim() != "0"
+    }
+
+
+    /**
+     * Altera a moeda utilizada no cálculo.
+     *
+     * Não executa conversão cambial.
+     *
+     * Os valores monetários anteriores são limpos
+     * para impedir a mistura de moedas diferentes.
+     *
+     * Preserva:
+     * - Nome da peça.
+     * - Impressora selecionada.
+     * - Peso do filamento.
+     * - Tempo de impressão.
+     * - Potência média.
+     * - Método de precificação.
+     * - Percentuais de lucro e comissão.
+     *
+     * A interface deve solicitar confirmação
+     * antes de chamar este método quando já
+     * existirem valores monetários preenchidos.
+     */
+    fun onCurrencyChanged(
+        newCurrency: CalculationCurrency
+    ) {
+
+        if (_formState.value.currency == newCurrency) {
+            return
+        }
+
+        updateForm {
+            it.copy(
+                currency = newCurrency,
+
+                // Custos da moeda anterior.
+                filamentPricePerKg = "",
+                electricityRatePerKwh = "",
+                printerWearPerHour = "",
+                packagingCost = "0"
+            )
+        }
+
+        // Limpa erros referentes aos campos
+        // monetários que foram reiniciados.
+        _fieldErrors.update { errors ->
+            errors -
+                    CalculatorFormField.FILAMENT_PRICE -
+                    CalculatorFormField.ELECTRICITY_RATE -
+                    CalculatorFormField.PRINTER_WEAR -
+                    CalculatorFormField.PACKAGING
+        }
+    }
+
 
     /**
      * Valida o formulário e calcula o preço da peça.

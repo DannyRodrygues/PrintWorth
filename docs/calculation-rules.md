@@ -333,3 +333,214 @@ automaticamente:
 
 O resultado deve ser interpretado como
 uma estimativa baseada nos dados fornecidos.
+
+
+---
+
+## 20. Cálculos com múltiplas moedas
+
+**Status:** Implementado e validado no Android.
+
+### 20.1 Moedas suportadas
+
+O PrintWorth permite realizar cálculos financeiros
+utilizando três moedas:
+
+| Código | Moeda | Símbolo |
+|---|---|---|
+| BRL | Real brasileiro | R$ |
+| USD | Dólar americano | US$ |
+| EUR | Euro | € |
+
+A moeda padrão é BRL.
+
+### 20.2 Regra de funcionamento
+
+O usuário informa todos os custos diretamente
+na moeda selecionada.
+
+O aplicativo não realiza conversão cambial.
+
+Exemplo:
+
+Se o usuário selecionar EUR e informar
+10,00 como preço do filamento por quilograma,
+o valor será interpretado como € 10,00/kg.
+
+Todos os resultados serão apresentados em euros.
+
+A mesma regra é aplicada ao Real e ao Dólar.
+
+### 20.3 Fórmulas financeiras
+
+As fórmulas do PrintWorth são independentes
+da moeda selecionada.
+
+Continuam sendo utilizadas as regras de:
+
+- Custo do filamento.
+- Custo de energia.
+- Desgaste da impressora.
+- Embalagem.
+- Custo base.
+- Lucro sobre o custo (COST_MARKUP).
+- Margem sobre a venda (SALE_MARGIN).
+- Comissão opcional.
+- Lucro estimado.
+- Margem efetiva.
+
+A seleção da moeda não modifica os percentuais,
+as fórmulas ou a política de arredondamento.
+
+### 20.4 Precisão monetária
+
+As três moedas suportadas possuem duas casas
+decimais para valores monetários finais.
+
+O motor financeiro utiliza:
+
+- Valores monetários finais em centavos.
+- Tarifas e preços unitários com quatro
+  casas decimais.
+- Percentuais representados em pontos-base.
+- Aritmética inteira para preservar precisão.
+
+Não são utilizados Float ou Double para
+representar dinheiro.
+
+Os valores em centavos representam a unidade
+monetária mínima da moeda selecionada.
+
+### 20.5 Exemplo de cálculo em euros
+
+Considere os seguintes valores informados
+diretamente em euros:
+
+| Parâmetro | Valor |
+|---|---:|
+| Moeda | EUR |
+| Filamento utilizado | 100 g |
+| Preço do filamento | € 10,00/kg |
+| Tempo de impressão | 5 horas |
+| Potência média informada | 1.300 W |
+| Tarifa de energia | € 1,00/kWh |
+| Desgaste | € 1,00/h |
+| Embalagem | € 2,00 |
+| Método | Sobre o custo |
+| Lucro desejado | 100% |
+| Comissão | Desativada |
+
+A potência de 1.300 W reproduz o valor
+informado neste cenário de teste.
+Não representa uma recomendação de
+consumo médio para uma impressora específica.
+
+#### Custo do filamento
+
+100 / 1000 × 10,00 = € 1,00
+
+#### Custo de energia
+
+1.300 / 1000 × 5 = 6,5 kWh
+
+6,5 × 1,00 = € 6,50
+
+#### Custo de desgaste
+
+5 × 1,00 = € 5,00
+
+#### Custo base
+
+€ 1,00 + € 6,50 + € 5,00 + € 2,00
+
+Custo base = € 14,50
+
+#### Preço sugerido
+
+Método: COST_MARKUP
+
+Lucro desejado: 100%
+
+€ 14,50 × (1 + 100 / 100)
+
+Preço sugerido = € 29,00
+
+#### Lucro estimado
+
+€ 29,00 - € 14,50 = € 14,50
+
+#### Margem efetiva
+
+14,50 / 29,00 × 100 = 50%
+
+### 20.6 Resultado validado
+
+| Descrição | Resultado |
+|---|---:|
+| Filamento | € 1,00 |
+| Energia | € 6,50 |
+| Desgaste | € 5,00 |
+| Embalagem | € 2,00 |
+| Custo base | € 14,50 |
+| Preço sugerido | € 29,00 |
+| Lucro estimado | € 14,50 |
+| Margem efetiva | 50% |
+
+O cenário acima foi conferido manualmente
+durante os testes do aplicativo Android.
+
+### 20.7 Alteração da moeda
+
+Quando o usuário altera a moeda do cálculo,
+os valores monetários anteriores são limpos
+após confirmação.
+
+Essa operação evita interpretar valores
+informados em uma moeda como se
+pertencessem a outra.
+
+A alteração preserva os dados não monetários,
+incluindo impressora, peso, tempo e percentuais.
+
+Um resultado anterior é invalidado.
+
+### 20.8 Formatação dos resultados
+
+A apresentação monetária é realizada
+pelo componente MoneyFormatter.
+
+Exemplos:
+
+| Moeda | Valor formatado |
+|---|---|
+| BRL | R$ 1.234,56 |
+| USD | US$ 1,234.56 |
+| EUR | € 1.234,56 |
+
+A formatação altera apenas a representação
+visual do valor.
+
+Não existe conversão entre moedas.
+
+### 20.9 Validação
+
+Foram realizados testes manuais com:
+
+- Real brasileiro (BRL).
+- Dólar americano (USD).
+- Euro (EUR).
+
+Os testes confirmaram:
+
+- [x] Seleção das três moedas.
+- [x] Atualização das unidades monetárias.
+- [x] Cálculos financeiros consistentes.
+- [x] Resultados apresentados na moeda escolhida.
+- [x] Comissão e lucro apresentados na mesma moeda.
+- [x] Limpeza dos valores ao alterar a moeda.
+
+O MoneyFormatter possui testes automatizados
+para as três moedas.
+
+A ampliação dos testes automatizados de
+integração permanece como atividade futura.

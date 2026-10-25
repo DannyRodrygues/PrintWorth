@@ -359,6 +359,52 @@ fun AboutScreen(
             )
         }
 
+
+// Moedas disponíveis no aplicativo.
+        AboutSection(
+            title = "Moedas disponíveis",
+            expanded = expandedSection == "currencies",
+            onToggle = {
+                expandedSection = if (
+                    expandedSection == "currencies"
+                ) null else "currencies"
+            }
+        ) {
+
+            Text(
+                text = "O PrintWorth permite calcular os custos " +
+                        "e preços de venda em três moedas:"
+            )
+
+            Text(
+                text = "• Real brasileiro (R$)\n" +
+                        "• Dólar americano (US$)\n" +
+                        "• Euro (€)",
+                fontWeight = FontWeight.Medium
+            )
+
+            Text(
+                text = "Todos os valores devem ser informados " +
+                        "diretamente na moeda selecionada. " +
+                        "O custo total, o preço sugerido e o lucro " +
+                        "estimado serão apresentados nessa mesma moeda."
+            )
+
+            Text(
+                text = "O aplicativo não realiza conversão cambial.",
+                fontWeight = FontWeight.SemiBold,
+                color = colors.secondary
+            )
+
+            Text(
+                text = "Ao alterar a moeda, os valores monetários " +
+                        "já preenchidos são limpos após confirmação, " +
+                        "evitando misturar moedas diferentes. " +
+                        "Os demais dados da impressão são preservados."
+            )
+        }
+
+
         // 7. Informações do projeto.
         AboutSection(
             title = "Sobre o projeto",

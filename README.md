@@ -63,7 +63,7 @@ do preço de venda.
 
 ### ▶️ Assista à demonstração
 
-[🎥 Assistir ao vídeo demonstrativo do PrintWorth](https://github.com/user-attachments/assets/f6faaf6a-c479-4d76-9725-eab5ea603c1d)
+[🎥 Assistir ao vídeo demonstrativo do PrintWorth](https://github.com/user-attachments/assets/0efe092d-5ad6-45ca-b7d4-3849ff61aa2f)
 
 
 ---
@@ -89,6 +89,18 @@ do preço de venda.
 - [x] Cálculo da margem efetiva.
 - [x] Detalhamento individual dos custos.
 - [x] Ajuda contextual para os métodos de precificação.
+
+
+### 🌍 Suporte a múltiplas moedas
+
+- [x] Seleção de Real brasileiro (BRL).
+- [x] Seleção de Dólar americano (USD).
+- [x] Seleção de Euro (EUR).
+- [x] Formatação monetária conforme a moeda escolhida.
+- [x] Cálculo de custos, preço de venda e lucro na mesma moeda.
+- [x] Confirmação antes de alterar a moeda.
+- [x] Limpeza dos valores monetários ao trocar de moeda.
+- [x] Funcionamento offline, sem conversão cambial.
 
 ### 🖨️ Impressoras 3D
 
@@ -127,6 +139,98 @@ do preço de venda.
 - [ ] Preparação da primeira versão distribuível.
 
 ---
+
+## 🌍 Suporte a múltiplas moedas
+
+O PrintWorth permite realizar cálculos de custos
+de impressão 3D e formação de preços utilizando
+três moedas:
+
+| Moeda | Código | Exemplo |
+|---|---|---|
+| Real brasileiro | BRL | R$ 1.234,56 |
+| Dólar americano | USD | US$ 1,234.56 |
+| Euro | EUR | € 1.234,56 |
+
+### Como funciona?
+
+Na etapa **Impressão**, o usuário seleciona
+a moeda que deseja utilizar.
+
+Todos os custos devem ser informados diretamente
+na moeda escolhida.
+
+O aplicativo utiliza essa mesma moeda para
+apresentar:
+
+- Custo do filamento.
+- Custo de energia elétrica.
+- Desgaste da impressora.
+- Embalagem.
+- Custo total de produção.
+- Preço de venda sugerido.
+- Comissão do ponto de venda.
+- Lucro estimado.
+
+**Importante:** o PrintWorth não realiza
+conversão cambial.
+
+### Exemplo de cálculo em euros
+
+Considere uma impressão com os seguintes custos:
+
+| Descrição | Valor |
+|---|---:|
+| Filamento | € 1,00 |
+| Energia | € 6,50 |
+| Desgaste da impressora | € 5,00 |
+| Embalagem | € 2,00 |
+| **Custo total** | **€ 14,50** |
+
+Utilizando o método **Lucro sobre o custo**,
+com percentual de 100% e sem comissão:
+
+**Preço sugerido: € 29,00**
+
+**Lucro estimado: € 14,50**
+
+**Margem efetiva sobre a venda: 50%**
+
+As mesmas fórmulas funcionam em BRL e USD.
+
+### Segurança na troca de moeda
+
+Se houver custos preenchidos, o PrintWorth
+solicitará confirmação antes de alterar a moeda.
+
+Após a confirmação, os valores monetários
+anteriores serão limpos.
+
+Os dados da impressão, como impressora,
+peso, tempo, potência e percentuais,
+serão preservados.
+
+Isso evita misturar valores de moedas
+diferentes em um mesmo cálculo.
+
+### Precisão financeira
+
+O aplicativo utiliza aritmética de precisão
+fixa para representar valores monetários,
+sem depender de Float ou Double.
+
+A formatação dos resultados é realizada
+pelo componente `MoneyFormatter`.
+
+As três moedas funcionam offline,
+sem necessidade de consultar taxas de câmbio.
+
+Para conhecer as regras e os testes realizados,
+consulte a
+[documentação das regras de cálculo](docs/calculation-rules.md).
+
+---
+
 
 ## 🖨️ Catálogo de impressoras
 
@@ -710,6 +814,8 @@ Entre os componentes testados estão:
 - Validação de entradas.
 - Estado da calculadora.
 - Catálogo de impressoras.
+- Formatação monetária em BRL, USD e EUR.
+
 
 Comando utilizado:
 
@@ -735,6 +841,12 @@ Foram realizados testes de:
 - [x] Invalidação da impressora após exclusão.
 - [x] Cálculo utilizando impressoras selecionadas.
 - [x] Preservação dos dados ao editar o cálculo.
+- [x] Seleção de Real, Dólar e Euro.
+- [x] Atualização dos símbolos monetários nos campos.
+- [x] Validação dos cálculos nas três moedas.
+- [x] Apresentação dos resultados na moeda escolhida.
+- [x] Limpeza dos custos após troca de moeda.
+
 
 ### Testes ainda necessários
 
@@ -801,6 +913,12 @@ A documentação será atualizada continuamente conforme as funcionalidades fore
 - [x] Métodos de precificação.
 - [x] Comissão opcional.
 - [x] Ajuda contextual dos métodos financeiros.
+- [x] Suporte a múltiplas moedas (BRL, USD e EUR).
+- [x] Formatação monetária internacional.
+- [x] Proteção contra mistura de moedas.
+- [x] Testes do formatador monetário.
+- [x] Validação das três moedas em dispositivo Android.
+
 
 **Gerenciamento de impressoras**
 

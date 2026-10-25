@@ -44,6 +44,8 @@ import printworth.shared.generated.resources.printworth_icon
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.border
 import androidx.compose.ui.geometry.Offset
+import com.dannyrodrygues.printworth.domain.model.CalculationCurrency
+import com.dannyrodrygues.printworth.presentation.format.MoneyFormatter
 
 /**
  * Apresenta os resultados financeiros da impressão.
@@ -51,13 +53,16 @@ import androidx.compose.ui.geometry.Offset
  * Recebe dados já calculados pela camada de domínio.
  * Não executa fórmulas financeiras.
  */
+
 @Composable
 fun ResultScreen(
     result: PrintCalculationResult,
+    currency: CalculationCurrency,
     onEdit: () -> Unit,
     onNewCalculation: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+
     val colors = MaterialTheme.colorScheme
 
     Column(
@@ -101,9 +106,11 @@ fun ResultScreen(
             )
         }
 
+
         FinancialHighlightCard(
             title = "Preço sugerido",
             amountInCents = result.suggestedSalePrice.cents,
+            currency = currency,
             gradientColors = listOf(
                 Color(0xFF103D46),
                 Color(0xFF07333B)
@@ -113,6 +120,7 @@ fun ResultScreen(
         FinancialHighlightCard(
             title = "Lucro estimado",
             amountInCents = result.estimatedProfit.cents,
+            currency = currency,
             gradientColors = listOf(
                 Color(0xFF007F73),
                 Color(0xFF00958B)
@@ -123,6 +131,7 @@ fun ResultScreen(
                 }
                 ?: "Margem sobre a venda: não se aplica"
         )
+
 
         Surface(
             modifier = Modifier.fillMaxWidth(),
@@ -147,22 +156,26 @@ fun ResultScreen(
 
                 ResultCostRow(
                     label = "Filamento",
-                    amountInCents = result.filamentCost.cents
+                    amountInCents = result.filamentCost.cents,
+                    currency = currency
                 )
 
                 ResultCostRow(
                     label = "Energia",
-                    amountInCents = result.energyCost.cents
+                    amountInCents = result.energyCost.cents,
+                    currency = currency
                 )
 
                 ResultCostRow(
                     label = "Desgaste da impressora",
-                    amountInCents = result.printerWearCost.cents
+                    amountInCents = result.printerWearCost.cents,
+                    currency = currency
                 )
 
                 ResultCostRow(
                     label = "Embalagem",
-                    amountInCents = result.packagingCost.cents
+                    amountInCents = result.packagingCost.cents,
+                    currency = currency
                 )
 
                 HorizontalDivider(
@@ -172,6 +185,7 @@ fun ResultScreen(
                 ResultCostRow(
                     label = "Custo base",
                     amountInCents = result.baseCost.cents,
+                    currency = currency,
                     emphasized = true
                 )
 
@@ -181,7 +195,8 @@ fun ResultScreen(
 
                 ResultCostRow(
                     label = "Comissão do ponto",
-                    amountInCents = result.commissionAmount.cents
+                    amountInCents = result.commissionAmount.cents,
+                    currency = currency
                 )
 
                 Spacer(
@@ -437,10 +452,12 @@ private fun ResultStep(
 /**
  * Cartão de destaque para preço e lucro.
  */
+
 @Composable
 private fun FinancialHighlightCard(
     title: String,
     amountInCents: Long,
+    currency: CalculationCurrency,
     gradientColors: List<Color>,
     subtitle: String? = null
 ) {
@@ -464,7 +481,10 @@ private fun FinancialHighlightCard(
         )
 
         Text(
-            text = formatCurrency(amountInCents),
+            text = MoneyFormatter.format(
+                amountInCents = amountInCents,
+                currency = currency
+            ),
             color = Color.White,
             fontSize = 38.sp,
             lineHeight = 44.sp,
@@ -481,15 +501,19 @@ private fun FinancialHighlightCard(
     }
 }
 
+
 /**
  * Uma linha do detalhamento financeiro.
  */
+
 @Composable
 private fun ResultCostRow(
     label: String,
     amountInCents: Long,
+    currency: CalculationCurrency,
     emphasized: Boolean = false
 ) {
+
     val colors = MaterialTheme.colorScheme
 
     Row(
@@ -511,7 +535,10 @@ private fun ResultCostRow(
         )
 
         Text(
-            text = formatCurrency(amountInCents),
+            text = MoneyFormatter.format(
+                amountInCents = amountInCents,
+                currency = currency
+            ),
             color = colors.onSurface,
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = if (emphasized) {
@@ -521,26 +548,6 @@ private fun ResultCostRow(
             }
         )
     }
-}
-
-/**
- * Formata centavos como moeda brasileira,
- * sem conversão por ponto flutuante.
- */
-private fun formatCurrency(cents: Long): String {
-
-    val reais = (cents / 100L)
-        .toString()
-        .reversed()
-        .chunked(3)
-        .joinToString(".")
-        .reversed()
-
-    val centavos = (cents % 100L)
-        .toString()
-        .padStart(2, '0')
-
-    return "R$ $reais,$centavos"
 }
 
 /**
