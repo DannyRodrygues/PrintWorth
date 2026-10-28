@@ -1,6 +1,6 @@
 # PrintWorth — Requisitos
 
-Status: especificação inicial
+Status: requisitos implementados e em evolução
 Plataforma inicial: Android
 Ambiente de desenvolvimento: Ubuntu
 Tecnologia: Kotlin Multiplatform e Compose Multiplatform
@@ -288,21 +288,59 @@ A ação Novo cálculo deve limpar o formulário.
 O indicador visual deve identificar a etapa atual
 e as etapas já concluídas.
 
-## 13. Limitações e funcionalidades futuras
+### 13. Limitações e funcionalidades futuras
 
-Funcionalidades ainda previstas:
+O PrintWorth possui as principais funcionalidades
+da calculadora financeira implementadas e validadas
+em dispositivo Android.
+
+### Funcionalidades implementadas
 
 - Cadastro de impressoras personalizadas.
-- Persistência local das impressoras.
-- Ampliação dos testes de limites numéricos.
-- Validação de acessibilidade.
-- Revisão completa do tema Light.
-- Distribuição da versão Android.
+- Persistência local com AndroidX DataStore.
+- Edição e exclusão de impressoras pessoais.
+- Catálogo offline de impressoras 3D.
+- Cálculo dos custos de produção.
+- Métodos de precificação.
+- Comissão opcional.
+- Suporte a BRL, USD e EUR.
+- Temas Light e Dark.
+- Geração de APK de release assinado.
 
-O salvamento de cálculos permanece como
-funcionalidade futura, sujeito à definição
-de escopo e persistência.
+### Melhorias previstas
 
+- Ampliação dos testes automatizados.
+- Testes adicionais de limites numéricos.
+- Tratamento completo de falhas de persistência.
+- Restauração do estado após encerramento
+  do processo Android.
+- Ampliação da cobertura de acessibilidade.
+- Testes adicionais em diferentes dispositivos
+  e tamanhos de tela.
+- Preparação da distribuição pública.
+
+### Funcionalidades futuras
+
+Poderão ser avaliadas em versões posteriores:
+
+- Histórico de cálculos realizados.
+- Salvamento de orçamentos.
+- Controle de estoque de filamentos.
+- Gestão de clientes.
+- Compartilhamento de orçamentos.
+
+Essas funcionalidades ainda não fazem parte
+do escopo implementado.
+
+### Estado da distribuição
+
+A versão Android 1.1 foi compilada e teve
+seu APK de release assinado digitalmente.
+
+A integridade e a identificação da versão
+foram verificadas.
+
+A distribuição pública permanece em preparação.
 
 ---
 

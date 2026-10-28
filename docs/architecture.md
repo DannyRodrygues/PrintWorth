@@ -1,6 +1,8 @@
 # PrintWorth — Arquitetura
 
-Status: arquitetura inicial; implementação em andamento.
+Status: arquitetura implementada e em evolução.
+Versão Android: PrintWorth 1.1.
+Última revisão: 28/10/2026.
 
 ## 1. Objetivo
 
@@ -26,7 +28,7 @@ gradle/libs.versions.toml.
 
 A persistência local das impressoras pessoais
 utiliza AndroidX DataStore Preferences,
-com implementação específica para Android..
+com implementação específica para Android.
 
 ## 3. Módulos
 
@@ -464,13 +466,34 @@ em dispositivo físico.
 Ainda não foram implementados testes automatizados
 para os componentes visuais.
 
-### 17.3 Resultado
+#### 17.3 Resultado
 
-A interface inicial e o sistema de temas foram
-validados no dispositivo Android.
+A interface inicial e os temas Light e Dark
+foram implementados e validados em dispositivo
+Android físico.
 
-A implementação está preparada para receber
-a navegação e as telas da calculadora.
+A navegação entre as telas principais
+está implementada e funcional.
+
+O aplicativo permite:
+
+- Acessar a calculadora pela tela inicial.
+- Navegar entre as etapas Impressão e Custos.
+- Selecionar impressoras do catálogo.
+- Gerenciar impressoras pessoais.
+- Calcular os custos de produção.
+- Selecionar BRL, USD ou EUR.
+- Visualizar os resultados financeiros.
+- Retornar para editar os dados.
+- Iniciar um novo cálculo.
+- Consultar a seção educativa.
+
+Os testes manuais confirmaram o funcionamento
+dessas funcionalidades em dispositivo Android.
+
+A ampliação dos testes automatizados
+e a revisão de cenários extremos continuam
+previstas para as próximas etapas.
 
 ---
 
@@ -478,7 +501,8 @@ a navegação e as telas da calculadora.
 
 ## 18. Estado atual da implementação
 
-**Revisão:** 23/10/2026
+**Revisão:** 28/10/2026
+**Versão Android:** 1.1
 
 ### Funcionalidades implementadas
 
@@ -509,6 +533,15 @@ a navegação e as telas da calculadora.
 - [x] Preservação de potência ajustada manualmente.
 - [x] Invalidação da seleção após exclusão.
 - [x] Testes de sincronização em dispositivo Android.
+- [x] Suporte a Real, Dólar e Euro.
+- [x] Formatação monetária internacional.
+- [x] Confirmação e limpeza dos custos ao trocar de moeda.
+- [x] Seção educativa sobre múltiplas moedas.
+- [x] Validação dos cálculos nas três moedas.
+- [x] Testes automatizados do MoneyFormatter.
+- [x] Validação visual dos temas Light e Dark.
+- [x] Geração e assinatura digital do APK 1.1.
+- [x] Verificação da integridade e versão do APK.
 
 ### Funcionalidades pendentes
 
@@ -516,10 +549,10 @@ a navegação e as telas da calculadora.
 - [ ] Tratamento completo de falhas de persistência.
 - [ ] Estratégia de restauração após morte do processo.
 - [ ] Testes completos de acessibilidade.
-- [ ] Validação das novas telas no tema Light.
 - [ ] Revisão de navegação e experiência do usuário.
 - [ ] Verificação de desempenho.
-- [ ] Preparação da distribuição Android.
+- [ ] Preparação da distribuição pública do APK.
+- [ ] Testes adicionais de instalação e atualização.
 
 O salvamento de cálculos permanece como
 funcionalidade futura a ser definida.
@@ -800,9 +833,6 @@ A documentação completa está disponível em:
 
 `docs/printers.md`
 
-
-
-
 ### 19.9 Testes e validação
 
 Testes automatizados existentes incluem:
@@ -812,6 +842,7 @@ Testes automatizados existentes incluem:
 - DecimalInputParserTest.kt
 - CalculatorFormValidatorTest.kt
 - CalculatorViewModelTest.kt
+- MoneyFormatterTest.kt
 
 Comando utilizado:
 

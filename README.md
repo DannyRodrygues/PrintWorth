@@ -25,6 +25,10 @@ O objetivo do aplicativo é oferecer uma ferramenta simples, precisa e intuitiva
 
 O projeto está sendo desenvolvido como parte do meu **portfólio profissional em desenvolvimento Android**, aplicando conceitos de arquitetura de software, gerenciamento de estado, persistência local, testes e documentação técnica.
 
+O **PrintWorth nasceu de uma necessidade real**: minha irmã trabalha com impressão 3D e precisava de uma ferramenta prática para calcular seus custos de produção e definir preços de venda. A partir dessa necessidade, desenvolvi o aplicativo como um projeto pessoal, transformando um problema cotidiano em uma solução tecnológica.
+
+Além de atender a essa demanda, o projeto representa minha evolução no desenvolvimento Android, com foco em boas práticas de arquitetura, precisão financeira, experiência do usuário e testes.
+
 ### 🎯 Objetivos
 
 - Facilitar o cálculo dos custos de impressão 3D.
@@ -35,7 +39,9 @@ O projeto está sendo desenvolvido como parte do meu **portfólio profissional e
 - Disponibilizar uma experiência intuitiva e acessível.
 - Funcionar sem necessidade de conexão com a internet.
 
-> **Status:** em desenvolvimento. O fluxo principal da calculadora e o gerenciamento de impressoras já foram implementados e testados em dispositivo Android. Melhorias de qualidade e preparação para distribuição continuam em andamento.
+> > **Status:** projeto pessoal em evolução. A calculadora financeira, o gerenciamento de impressoras e o suporte a múltiplas moedas (BRL, USD e EUR) estão implementados e foram validados em dispositivo Android.
+
+> **Versão de testes mais recente:** PrintWorth **1.1** (`versionCode 2`). O APK foi gerado, assinado digitalmente e teve sua integridade verificada. A disponibilização pública e os testes adicionais de distribuição permanecem em andamento.
 
 ---
 
@@ -59,7 +65,7 @@ do preço de venda.
 5. **Etapa Custos:** preenchimento das despesas e definição do método de precificação.
 6. **Resultado:** visualização do preço sugerido, lucro estimado e detalhamento dos custos.
 7. **Edição do cálculo:** retorno ao formulário preservando os dados preenchidos.
-
+8. **Múltiplas moedas:** seleção de Real, Dólar e Euro, com cálculo e apresentação dos resultados na moeda escolhida.
 
 ### ▶️ Assista à demonstração
 
@@ -136,7 +142,7 @@ do preço de venda.
 - [ ] Restauração do formulário após encerramento do processo Android.
 - [ ] Revisão completa de acessibilidade.
 - [ ] Testes adicionais de desempenho e compatibilidade.
-- [ ] Preparação da primeira versão distribuível.
+- [ ] Preparação da distribuição pública do aplicativo.
 
 ---
 
@@ -846,6 +852,10 @@ Foram realizados testes de:
 - [x] Validação dos cálculos nas três moedas.
 - [x] Apresentação dos resultados na moeda escolhida.
 - [x] Limpeza dos custos após troca de moeda.
+- [x] Validação visual dos temas Light e Dark.
+- [x] Alternância automática conforme o tema do Android.
+- [x] Verificações manuais de legibilidade e usabilidade.
+- [x] Geração e verificação da assinatura digital do APK 1.1.
 
 
 ### Testes ainda necessários
@@ -946,13 +956,29 @@ A documentação será atualizada continuamente conforme as funcionalidades fore
 
 ### 📦 Etapa 4 — Distribuição
 
-- [ ] Preparação da primeira versão.
-- [ ] Revisão final do aplicativo.
-- [ ] Assinatura do APK de distribuição.
-- [ ] Documentação de instalação.
-- [ ] Gravação do vídeo demonstrativo.
-- [ ] Disponibilização do APK.
+**APK Android**
 
+- [x] Geração do APK de release.
+- [x] Criação e utilização da chave de assinatura.
+- [x] Assinatura digital do APK.
+- [x] Verificação da assinatura APK Signature Scheme v2.
+- [x] Geração da versão 1.1 (`versionCode 2`).
+- [x] Validação da integridade e identificação da versão do APK.
+- [ ] Validação da instalação da versão 1.1 em outro dispositivo.
+- [ ] Teste de atualização preservando os dados existentes.
+
+**Documentação e apresentação**
+
+- [x] Documentação dos requisitos.
+- [x] Documentação da arquitetura.
+- [x] Documentação das regras financeiras.
+- [x] Documentação do gerenciamento de impressoras.
+- [x] Documentação do suporte a múltiplas moedas.
+- [x] Gravação do vídeo demonstrativo atualizado.
+- [x] Inclusão do vídeo no README.
+- [ ] Documentação de instalação e atualização do APK.
+- [ ] Disponibilização pública do APK.
+- [ ] Revisão final para distribuição.
 ---
 
 ## 👩‍💻 Desenvolvedora

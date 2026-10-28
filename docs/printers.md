@@ -2,7 +2,7 @@
 # PrintWorth — Catálogo e Gerenciamento de Impressoras
 
 **Status:** Implementado e validado no Android  
-**Última atualização:** 23/10/2026
+**Última atualização:** 28/10/2026
 
 ## 1. Objetivo
 
@@ -210,13 +210,36 @@ Resultado informado: BUILD SUCCESSFUL.
 
 ## 10. Pendências de qualidade
 
-- Confirmar persistência após reinicialização
-  completa do aplicativo, caso ainda não testada.
-- Verificar cenários de erro de leitura e gravação.
-- Ampliar testes automatizados do repositório.
-- Revisar acessibilidade da tela de gerenciamento.
-- Validar a interface em diferentes tamanhos
-  de tela e nos temas Light e Dark.
+O catálogo e o gerenciamento de impressoras
+estão implementados e funcionais no Android.
+
+Os testes manuais realizados confirmaram:
+
+- Seleção de impressoras do catálogo.
+- Cadastro, edição e exclusão de impressoras pessoais.
+- Sincronização com a calculadora.
+- Atualização automática da potência cadastrada.
+- Preservação de ajustes manuais.
+- Invalidação da seleção após exclusão.
+
+### Melhorias e validações adicionais
+
+- [ ] Confirmar a persistência dos cadastros após
+  encerramento completo e reabertura do aplicativo,
+  caso esse cenário ainda não tenha sido testado.
+- [ ] Ampliar testes automatizados de persistência.
+- [ ] Validar cenários de falha de leitura e gravação.
+- [ ] Ampliar testes específicos de acessibilidade
+  da tela de gerenciamento de impressoras.
+- [ ] Verificar a interface em diferentes tamanhos
+  e resoluções de tela.
+
+Os temas Light e Dark foram validados
+manualmente no aplicativo.
+
+A ampliação da cobertura de acessibilidade,
+compatibilidade e persistência permanece
+prevista para as próximas etapas.
 
 ## 11. Decisão de experiência do usuário
 
